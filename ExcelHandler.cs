@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Mime;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Office.Interop.Excel;
 using SimpleLogger;
@@ -37,22 +38,16 @@ namespace SpätzleCrawler
         #region Constructor
 
         /// <summary>
-        /// Creates a new Instance for a new File and initialize it
-        /// </summary>
-        public ExcelHandler()
-        {
-            Init();
-        }
-
-        /// <summary>
         /// Finalizer, close excel and release the resources
         /// </summary>
         ~ExcelHandler()
         {
-            if(CanUse)
+            if(CouldUse)
             {
+#if !DEBUG
                 ExcelApp.DisplayAlerts = false;
                 ExcelApp.Quit();
+#endif
             }
 
             ExcelApp = null;
@@ -84,30 +79,42 @@ namespace SpätzleCrawler
         /// </summary>
         public bool CanUse => ExcelApp != null && Workbook != null && Worksheet != null;
 
+        /// <summary>
+        /// Indicates if Excel propably could be used
+        /// </summary>
+        public bool CouldUse => ExcelApp != null || Workbook != null || Worksheet != null;
+
         #endregion
 
         #region Main Methods
 
         /// <summary>
-        /// Initialize a new file
+        /// Open the given file
         /// </summary>
-        public void Init()
+        public bool OpenFile(string filename)
         {
             try
             {
-                ExcelApp = new Application();
+                SimpleLog.Info($"Open Excel file \"{filename}\".");
+                ExcelApp = new Application
+                {
 #if DEBUG
-                ExcelApp.Visible = true;
+                    Visible = true,
+#else
+                    DisplayAlerts = false
 #endif
-                ExcelApp.DisplayAlerts = false;
-                Workbook = ExcelApp.Workbooks.Add(1);
+                };
+                Workbook = ExcelApp.Workbooks.Open(filename);
                 Worksheet = (Worksheet)Workbook.Sheets[1];
+
+                return true;
             }
             catch(Exception e)
             {
                 SimpleLog.Error("Excel export cannot be used. Is MS Excel installed on your machine?");
                 SimpleLog.Error(e.ToString());
             }
+            return false;
         }
 
         /// <summary>
@@ -119,31 +126,91 @@ namespace SpätzleCrawler
         {
             if(!CanUse) return false;
 
-            if(!fileName.EndsWith(".xlsx")) fileName += ".xlsx";
-            FileInfo file = new FileInfo(fileName);
-            bool retVal = false;
-
             try
             {
-                SimpleLog.Info($"Save Excel file \"{file.FullName}\".");
-                Workbook.SaveAs(Filename: file.FullName);
+                SimpleLog.Info($"Save Excel file \"{Workbook.FullName}\".");
+                Workbook.Save();
                 ExcelApp.Quit();
-                retVal = true;
-                SimpleLog.Info($"Excel file \"{file.FullName}\" saved.");
+                SimpleLog.Info($"Excel file \"{Workbook.FullName}\" saved.");
+                return true;
             }
             catch(Exception e)
             {
-                SimpleLog.Log($"Failed to write file \"{file.FullName}\".");
+                SimpleLog.Log($"Failed to write file \"{Workbook.FullName}\".");
                 SimpleLog.Error(e.ToString());
             }
-            return retVal;
+            return false;
         }
 
         #endregion
 
-        #region Write Data
+        #region Read/Write Data
 
+        /// <summary>
+        /// Reads and returns the participating users list
+        /// </summary>
+        /// <returns>The participating usernames</returns>
+        public List<string> ReadUserList()
+        {
+            int row = 2;
+            int col = 'L' - 'A';
 
+            var users = new List<string>();
+            while(col < 71)
+            {
+                var cell = (Range)Worksheet.Cells[row, col];
+                if(!cell.MergeCells)
+                    break;
+                var cellVal = (string)cell.Value;
+                users.Add(cellVal);
+
+                SimpleLog.Info($"Read Excel cell [{row},{col}]: {cellVal}");
+
+                col += 3;
+            }
+
+            return users;
+        }
+
+        /// <summary>
+        /// Reads and returns the number of the next not yet started matchday.
+        /// Returns -1 if no matchday found.
+        /// </summary>
+        /// <returns>The next matchday number</returns>
+        public int GetNextMatchday()
+        {
+            int resCol = 3;
+
+            int weekRow = 2;
+            int weekCol = 2;
+
+            var matchdayRegex = new Regex(@"\d{1,2}");
+            while(weekRow < 205)
+            {
+
+                bool isEmpty = false;
+                for(int i = weekRow + 1; i <= weekRow + 9; i++)
+                {
+                    var resValue = (string)((Range)Worksheet.Cells[i, resCol]).Value;
+                    isEmpty = String.IsNullOrWhiteSpace(resValue);
+
+                    if(!isEmpty)
+                        break; // break if result cells are not empty
+                }
+
+                // if result cells are all empty, return matchday number
+                if(isEmpty)
+                {
+                    var weekValue = (string)((Range)Worksheet.Cells[weekRow, weekCol]).Value;
+                    var day = matchdayRegex.Match(weekValue).Value;
+                    return Int32.Parse(day);
+                }
+
+                // check next matchday if result cells are not empty
+                weekRow += 12;
+            }
+            return -1;
+        }
 
         #endregion
 
