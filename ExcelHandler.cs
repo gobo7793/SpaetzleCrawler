@@ -1,4 +1,22 @@
-﻿using System;
+﻿#region License
+// SpätzleCrawler
+// Copyright (C) 2018 Gerald Siegert
+//  
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//  
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//  
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,7 +33,7 @@ namespace SpätzleCrawler
     /// </summary>
     public class ExcelHandler
     {
-        
+
         #region Constructor
 
         /// <summary>
@@ -76,7 +94,7 @@ namespace SpätzleCrawler
         public void Init()
         {
             try
-            {       
+            {
                 ExcelApp = new Application();
 #if DEBUG
                 ExcelApp.Visible = true;
@@ -85,7 +103,7 @@ namespace SpätzleCrawler
                 Workbook = ExcelApp.Workbooks.Add(1);
                 Worksheet = (Worksheet)Workbook.Sheets[1];
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 SimpleLog.Error("Excel export cannot be used. Is MS Excel installed on your machine?");
                 SimpleLog.Error(e.ToString());
