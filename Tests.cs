@@ -37,7 +37,19 @@ namespace SpätzleCrawler
             Assert.AreEqual(20, users.Count);
             Assert.AreEqual("Valbatorix", users[0]);
             Assert.AreEqual("lars-gutsein", users[7]);
-            Assert.AreEqual("Frei", users[20]);
+            Assert.AreEqual("Frei", users[19]);
+        }
+
+        [Test]
+        public void TestExcelGetNextMatchday()
+        {
+            var filename = @"E:\Dokumente\VS Projects\SpaetzleCrawler\spaetzle2018-1.xlsx";
+
+            var excel = new ExcelHandler();
+            excel.OpenFile(filename);
+            var matchday = excel.GetNextMatchday();
+
+            Assert.AreEqual(19, matchday);
         }
     }
 }

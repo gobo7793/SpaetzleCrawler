@@ -153,7 +153,7 @@ namespace SpätzleCrawler
         public List<string> ReadUserList()
         {
             int row = 2;
-            int col = 'L' - 'A';
+            int col = 'L' - 'A' + 1;
 
             var users = new List<string>();
             while(col < 71)
@@ -162,7 +162,8 @@ namespace SpätzleCrawler
                 if(!cell.MergeCells)
                     break;
                 var cellVal = (string)cell.Value;
-                users.Add(cellVal);
+                if(!String.IsNullOrWhiteSpace(cellVal))
+                    users.Add(cellVal);
 
                 SimpleLog.Info($"Read Excel cell [{row},{col}]: {cellVal}");
 
@@ -191,8 +192,9 @@ namespace SpätzleCrawler
                 bool isEmpty = false;
                 for(int i = weekRow + 1; i <= weekRow + 9; i++)
                 {
-                    var resValue = (string)((Range)Worksheet.Cells[i, resCol]).Value;
-                    isEmpty = String.IsNullOrWhiteSpace(resValue);
+                    isEmpty = false;
+                    var resValue = (double?)((Range)Worksheet.Cells[i, resCol]).Value;
+                    isEmpty = !resValue.HasValue;
 
                     if(!isEmpty)
                         break; // break if result cells are not empty
@@ -201,9 +203,10 @@ namespace SpätzleCrawler
                 // if result cells are all empty, return matchday number
                 if(isEmpty)
                 {
-                    var weekValue = (string)((Range)Worksheet.Cells[weekRow, weekCol]).Value;
-                    var day = matchdayRegex.Match(weekValue).Value;
-                    return Int32.Parse(day);
+                    var weekValue = (double)((Range)Worksheet.Cells[weekRow, weekCol]).Value;
+                    //var day = matchdayRegex.Match(weekValue).Value;
+                    //return Int32.Parse(day);
+                    return Convert.ToInt32(weekValue);
                 }
 
                 // check next matchday if result cells are not empty
