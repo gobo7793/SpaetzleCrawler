@@ -16,39 +16,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SimpleLogger;
-
 namespace SpätzleCrawler
 {
-    class Program
+    public class Crawler
     {
-        static void Main(string[] args)
-        {
-            try
-            {
-                // read necessary data
-                FileHandler.ReadConfig(Settings.ConfigFileName);
-                var excel = new ExcelHandler();
-                excel.OpenFile(Settings.TargetFileName);
-                var users = excel.ReadUserList();
-
-                // getting tips
-
-
-                // saving all
-
-            }
-            catch(Exception e)
-            {
-                Console.WriteLine(e);
-                SimpleLog.Log(e);
-            }
-
-        }
+        
     }
 }

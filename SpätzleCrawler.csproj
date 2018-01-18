@@ -48,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Crawler.cs" />
     <Compile Include="ExcelHandler.cs" />
     <Compile Include="FileHandler.cs" />
     <Compile Include="FootballMatch.cs" />

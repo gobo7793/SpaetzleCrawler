@@ -18,11 +18,19 @@
 
 namespace SpätzleCrawler
 {
+    /// <summary>
+    /// Class to storing the settings
+    /// </summary>
     public class Settings
     {
-        public string ConfigFileName { get; set; } = "config.txt";
+        /// <summary>
+        /// Filename of the configuration file
+        /// </summary>
+        public static string ConfigFileName { get; set; } = "config.txt";
 
-        static string TargetFileName { get; set; }
-
+        /// <summary>
+        /// File name of the target xlsx file
+        /// </summary>
+        public static string TargetFileName { get; set; }
     }
 }

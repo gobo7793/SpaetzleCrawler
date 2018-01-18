@@ -28,29 +28,29 @@ namespace SpätzleCrawler
     public class FileHandler
     {
         /// <summary>
-        /// Reads the config file and reads the target xlsx filename in the first line of the file
+        /// Reads the config file and save it to <see cref="Settings"/>
         /// </summary>
         /// <param name="filename">The config filename</param>
-        /// <returns>The target xlsx filename</returns>
-        public static string ReadConfig(string filename)
+        /// <returns>True if settings loaded</returns>
+        public static bool ReadConfig(string filename)
         {
             try
             {
-                string targetFile;
                 using(var sr = new StreamReader(filename))
                 {
-                    targetFile = sr.ReadLine();
+                    var targetFile = sr.ReadLine();
                     if(String.IsNullOrWhiteSpace(targetFile) || File.Exists(targetFile))
                         throw new InvalidDataException("Target xlsx filename could not be readed or file not found.");
+                    Settings.ConfigFileName = targetFile;
                 }
-                return targetFile;
+                return true;
             }
             catch(Exception e)
             {
                 SimpleLog.Error("Cannot read config file. Wrong filename or format?");
                 SimpleLog.Error(e.ToString());
             }
-            return null;
+            return false;
         }
     }
 }
