@@ -46,9 +46,23 @@ namespace SpätzleCrawler
 
             var excel = new ExcelHandler();
             excel.OpenFile(filename);
-            var matchday = excel.GetNextMatchday();
+            var matchday = excel.GetNextMatchdayNo();
 
             Assert.AreEqual(19, matchday); // insert expected matchday here
+        }
+
+        [Test]
+        public void TestExcelGetNextMatchdayMatches()
+        {
+            var filename = @"E:\Dokumente\VS Projects\SpaetzleCrawler\spaetzle2018-1.xlsx"; // insert file here
+
+            var excel = new ExcelHandler();
+            excel.OpenFile(filename);
+            var matchday = excel.GetNextMatchdayMatches();
+
+            Assert.AreEqual(9, matchday.Count);
+            Assert.AreEqual(("Hoffenheim", "Leverkusen"), matchday[1]);
+            Assert.AreEqual(("Schalke", "Hannover"), matchday[8]);
         }
 
         [Test]

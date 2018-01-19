@@ -36,19 +36,26 @@ namespace SpätzleCrawler
             try
             {
                 // read necessary data
-                var t = new Task<List<string>>(User.ReadUserList);
-                t.Start();
-                Console.Write("URL current thread: ");
-                var url = Console.ReadLine();
-                t.Wait();
-                var users = t.Result;
+                FileHandler.ReadConfig(Settings.ConfigFileName);
 
-                SimpleLog.Info($"{users.Count} Users found. Use {url} to get tips.");
+                var readUserTask = new Task<List<User>>(User.ReadUserList);
+                readUserTask.Start();
+                Console.Write("URL current thread: ");
+                Settings.TipThreadUrl = Console.ReadLine();
+                readUserTask.Wait();
+                var users = readUserTask.Result;
+                var matches = ExcelHandler.Handler.GetNextMatchdayMatches();
+
+                SimpleLog.Info($"{users.Count} Users found. Use {Settings.TipThreadUrl} to get tips.");
 
                 // getting tips
-
+                var posts = Crawler.GetPosts();
+                SimpleLog.Info($"{posts.Count} posts found.");
+                var usermatches = Parser.ParsePosts(matches, users, posts);
+                SimpleLog.Info("All data parsed.");
 
                 // saving all
+
 
             }
             catch(Exception e)
@@ -58,6 +65,5 @@ namespace SpätzleCrawler
             }
 
         }
-
     }
 }

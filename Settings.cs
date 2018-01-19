@@ -32,5 +32,10 @@ namespace SpätzleCrawler
         /// File name of the target xlsx file
         /// </summary>
         public static string TargetFileName { get; set; }
+
+        /// <summary>
+        /// URL of the tipping thread
+        /// </summary>
+        public static string TipThreadUrl { get; set; }
     }
 }

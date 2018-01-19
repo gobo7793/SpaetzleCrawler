@@ -105,7 +105,7 @@ namespace SpätzleCrawler
 
                     // read content
                     var contentTag = postNode.Descendants("div").First(d => d.GetClasses().Contains("forum-post-data"));
-                    var removeTag = contentTag.ChildNodes.FirstOrDefault(c => c.Name == "div");
+                    var removeTag = contentTag.ChildNodes.LastOrDefault(c => c.Name == "div");
                     if(removeTag != null)
                         contentTag.RemoveChild(removeTag);
 
@@ -114,6 +114,18 @@ namespace SpätzleCrawler
             }
 
             return Posts.Count;
+        }
+
+        /// <summary>
+        /// Reads all pages of <see cref="Settings.TipThreadUrl"/> and returns their posts
+        /// </summary>
+        /// <returns>All posts in the thread</returns>
+        public static List<(string Url, string Username, string Content)> GetPosts()
+        {
+            var crawler = new Crawler();
+            crawler.ReadPages(Settings.TipThreadUrl);
+            crawler.ReadPosts();
+            return crawler.Posts;
         }
     }
 }

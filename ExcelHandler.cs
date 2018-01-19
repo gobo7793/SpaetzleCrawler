@@ -34,8 +34,25 @@ namespace SpätzleCrawler
     /// </summary>
     public class ExcelHandler
     {
+        #region Constants
+
+        public const int MatchdayCol = 2;
+        public const int FirstMatchdayRow = 2;
+        public const int MaxMatchdayRow = 205;
+        public const int MatchdayRowCount = 12;
+
+        public const int FirstUserCol = 12;
+        public const int MaxUserCol = 71;
+        public const int UserColCount = 3;
+
+        #endregion
 
         #region Constructor
+
+        private ExcelHandler()
+        {
+            OpenFile(Settings.TargetFileName);
+        }
 
         /// <summary>
         /// Finalizer, close excel and release the resources
@@ -45,8 +62,8 @@ namespace SpätzleCrawler
             if(CouldUse)
             {
 #if !DEBUG
-                ExcelApp.DisplayAlerts = false;
-                ExcelApp.Quit();
+                ExcelApp?.DisplayAlerts = false;
+                ExcelApp?.Quit();
 #endif
             }
 
@@ -58,6 +75,13 @@ namespace SpätzleCrawler
         #endregion
 
         #region Properties
+
+        private static ExcelHandler _Handler;
+
+        /// <summary>
+        /// The Excel Handler with the open <see cref="Settings.TargetFileName"/>
+        /// </summary>
+        public static ExcelHandler Handler => _Handler ?? (_Handler = new ExcelHandler());
 
         /// <summary>
         /// The current Excel Application
@@ -153,10 +177,10 @@ namespace SpätzleCrawler
         public List<string> ReadUserList()
         {
             int row = 2;
-            int col = 'L' - 'A' + 1;
+            int col = FirstUserCol;
 
             var users = new List<string>();
-            while(col < 71)
+            while(col < MaxUserCol)
             {
                 var cell = (Range)Worksheet.Cells[row, col];
                 if(!cell.MergeCells)
@@ -167,10 +191,44 @@ namespace SpätzleCrawler
 
                 SimpleLog.Info($"Read Excel cell [{row},{col}]: {cellVal}");
 
-                col += 3;
+                col += UserColCount;
             }
 
             return users;
+        }
+
+        /// <summary>
+        /// Reads an returns the matches of the next matchday
+        /// </summary>
+        /// <returns></returns>
+        public List<(string, string)> GetNextMatchdayMatches()
+        {
+            var nextNo = GetNextMatchdayNo();
+
+            int team1Col = 2;
+            int team2Col = 5;
+
+            // search current matchday row
+            int matchdayRow;
+            for(matchdayRow = FirstMatchdayRow; matchdayRow < MaxMatchdayRow; matchdayRow += MatchdayRowCount)
+            {
+                var resValue = (double?)((Range)Worksheet.Cells[matchdayRow, MatchdayCol]).Value;
+                if(resValue.HasValue && Math.Abs(resValue.Value - nextNo) < 0.1)
+                {
+                    break;
+                }
+            }
+
+            // Get teams
+            var matches = new List<(string, string)>();
+            for(int i = matchdayRow + 1; i <= matchdayRow + 9; i++)
+            {
+                var team1 = (string)((Range)Worksheet.Cells[i, team1Col]).Value;
+                var team2 = (string)((Range)Worksheet.Cells[i, team2Col]).Value;
+                matches.Add((team1, team2));
+            }
+
+            return matches;
         }
 
         /// <summary>
@@ -178,15 +236,13 @@ namespace SpätzleCrawler
         /// Returns -1 if no matchday found.
         /// </summary>
         /// <returns>The next matchday number</returns>
-        public int GetNextMatchday()
+        public int GetNextMatchdayNo()
         {
             int resCol = 3;
 
-            int weekRow = 2;
-            int weekCol = 2;
+            int weekRow = FirstMatchdayRow;
 
-            var matchdayRegex = new Regex(@"\d{1,2}");
-            while(weekRow < 205)
+            while(weekRow < MaxMatchdayRow)
             {
 
                 bool isEmpty = false;
@@ -203,14 +259,12 @@ namespace SpätzleCrawler
                 // if result cells are all empty, return matchday number
                 if(isEmpty)
                 {
-                    var weekValue = (double)((Range)Worksheet.Cells[weekRow, weekCol]).Value;
-                    //var day = matchdayRegex.Match(weekValue).Value;
-                    //return Int32.Parse(day);
+                    var weekValue = (double)((Range)Worksheet.Cells[weekRow, MatchdayCol]).Value;
                     return Convert.ToInt32(weekValue);
                 }
 
                 // check next matchday if result cells are not empty
-                weekRow += 12;
+                weekRow += MatchdayRowCount;
             }
             return -1;
         }

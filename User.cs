@@ -43,12 +43,13 @@ namespace SpätzleCrawler
         /// Reads the userlist
         /// </summary>
         /// <returns>The userlist</returns>
-        public static List<string> ReadUserList()
+        public static List<User> ReadUserList()
         {
-            FileHandler.ReadConfig(Settings.ConfigFileName);
-            var excel = new ExcelHandler();
-            excel.OpenFile(Settings.TargetFileName);
-            return excel.ReadUserList();
+            var users = ExcelHandler.Handler.ReadUserList();
+            var userlist = new List<User>();
+            foreach(var user in users)
+                userlist.Add(new User {Name = user});
+            return userlist;
         }
     }
 
