@@ -31,6 +31,8 @@ namespace SpätzleCrawler
     {
         public static void Main(string[] args)
         {
+            SimpleLog.StartLogging();
+
             try
             {
                 // read necessary data

@@ -21,35 +21,59 @@ using NUnit.Framework;
 
 namespace SpätzleCrawler
 {
-    // For own test execution: setup tests for own excel file!
-    // It's based on the file for 2017-18 part 2 league 4!
+    // For own test execution: setup tests!
     public class Tests
     {
         [Test]
         public void TestExcelReadUserList()
         {
-            var filename = @"E:\Dokumente\VS Projects\SpaetzleCrawler\spaetzle2018-1.xlsx";
+            var filename = ""; // insert file here
 
             var excel = new ExcelHandler();
             excel.OpenFile(filename);
             var users = excel.ReadUserList();
 
             Assert.AreEqual(20, users.Count);
-            Assert.AreEqual("Valbatorix", users[0]);
-            Assert.AreEqual("lars-gutsein", users[7]);
-            Assert.AreEqual("Frei", users[19]);
+            Assert.AreEqual("", users[0]); // insert expected username here
+            Assert.AreEqual("", users[7]); // insert expected username here
+            Assert.AreEqual("", users[19]); // insert expected username here
         }
 
         [Test]
         public void TestExcelGetNextMatchday()
         {
-            var filename = @"E:\Dokumente\VS Projects\SpaetzleCrawler\spaetzle2018-1.xlsx";
+            var filename = ""; // insert file here
 
             var excel = new ExcelHandler();
             excel.OpenFile(filename);
             var matchday = excel.GetNextMatchday();
 
-            Assert.AreEqual(19, matchday);
+            Assert.AreEqual(19, matchday); // insert expected matchday here
+        }
+
+        [Test]
+        public void TestCrawlerReadPages()
+        {
+            var url =""; // insert url here
+
+            var crawler = new Crawler();
+            var pageCnt = crawler.ReadPages(url);
+
+            Assert.AreEqual(0, pageCnt); // insert expected page count here
+
+        }
+
+        [Test]
+        public void TestCrawlerReadPosts()
+        {
+            var url = ""; // insert url here
+
+            var crawler = new Crawler();
+            crawler.ReadPages(url);
+            var postCnt = crawler.ReadPosts();
+
+            Assert.AreEqual(0, postCnt); // insert expected post count here
+
         }
     }
 }
