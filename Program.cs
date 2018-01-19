@@ -18,8 +18,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using SimpleLogger;
 
@@ -27,15 +29,17 @@ namespace SpätzleCrawler
 {
     class Program
     {
-        static void Main(string[] args)
+        public static async void Main(string[] args)
         {
             try
             {
                 // read necessary data
-                FileHandler.ReadConfig(Settings.ConfigFileName);
-                var excel = new ExcelHandler();
-                excel.OpenFile(Settings.TargetFileName);
-                var users = excel.ReadUserList();
+                var t = new Task<List<string>>(ReadUserList);
+                t.Start();
+                Console.Write("URL der Tippabgabe: ");
+                var url = Console.ReadLine();
+                t.Wait();
+                var users = t.Result;
 
                 // getting tips
 
@@ -49,6 +53,18 @@ namespace SpätzleCrawler
                 SimpleLog.Log(e);
             }
 
+        }
+
+        /// <summary>
+        /// Reads the userlist
+        /// </summary>
+        /// <returns>The userlist</returns>
+        public static List<string> ReadUserList()
+        {
+            FileHandler.ReadConfig(Settings.ConfigFileName);
+            var excel = new ExcelHandler();
+            excel.OpenFile(Settings.TargetFileName);
+            return excel.ReadUserList();
         }
     }
 }
