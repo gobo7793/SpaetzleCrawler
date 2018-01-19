@@ -34,12 +34,14 @@ namespace SpätzleCrawler
             try
             {
                 // read necessary data
-                var t = new Task<List<string>>(ReadUserList);
+                var t = new Task<List<string>>(User.ReadUserList);
                 t.Start();
-                Console.Write("URL der Tippabgabe: ");
+                Console.Write("URL current thread: ");
                 var url = Console.ReadLine();
                 t.Wait();
                 var users = t.Result;
+
+                SimpleLog.Info($"{users.Count} Users found. Use {url} to get tips.");
 
                 // getting tips
 
@@ -55,16 +57,5 @@ namespace SpätzleCrawler
 
         }
 
-        /// <summary>
-        /// Reads the userlist
-        /// </summary>
-        /// <returns>The userlist</returns>
-        public static List<string> ReadUserList()
-        {
-            FileHandler.ReadConfig(Settings.ConfigFileName);
-            var excel = new ExcelHandler();
-            excel.OpenFile(Settings.TargetFileName);
-            return excel.ReadUserList();
-        }
     }
 }

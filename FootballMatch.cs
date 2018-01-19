@@ -21,7 +21,7 @@ namespace SpätzleCrawler
     /// <summary>
     /// Represents a football match
     /// </summary>
-    class FootballMatch
+    public class FootballMatch
     {
         /// <summary>
         /// Home team

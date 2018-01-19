@@ -27,7 +27,7 @@ namespace SpätzleCrawler
     /// <summary>
     /// Represents an user who tips a <see cref="FootballMatch"/>
     /// </summary>
-    class User
+    public class User
     {
         /// <summary>
         /// Usernick
@@ -38,5 +38,19 @@ namespace SpätzleCrawler
         /// Tips of the user
         /// </summary>
         public List<FootballMatch> Tips { get; } = new List<FootballMatch>(9);
+
+        /// <summary>
+        /// Reads the userlist
+        /// </summary>
+        /// <returns>The userlist</returns>
+        public static List<string> ReadUserList()
+        {
+            FileHandler.ReadConfig(Settings.ConfigFileName);
+            var excel = new ExcelHandler();
+            excel.OpenFile(Settings.TargetFileName);
+            return excel.ReadUserList();
+        }
     }
+
+
 }
