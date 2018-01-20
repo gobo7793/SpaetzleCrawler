@@ -72,8 +72,11 @@ namespace SpätzleCrawler
             if(CouldUse)
             {
 #if !DEBUG
-                ExcelApp?.DisplayAlerts = false;
-                ExcelApp?.Quit();
+                //if(ExcelApp != null)
+                //{
+                //    ExcelApp.DisplayAlerts = false;
+                //    ExcelApp.Quit();
+                //}
 #endif
             }
 
@@ -137,11 +140,8 @@ namespace SpätzleCrawler
                 SimpleLog.Info($"Open Excel file \"{filename}\".");
                 ExcelApp = new Application
                 {
-#if DEBUG
                     Visible = true,
-#else
-                    DisplayAlerts = false
-#endif
+                    DisplayAlerts = false,
                 };
                 Workbook = ExcelApp.Workbooks.Open(filename, Editable: true);
                 Worksheet = (Worksheet)Workbook.Sheets[1];
@@ -168,7 +168,7 @@ namespace SpätzleCrawler
             {
                 SimpleLog.Info($"Save Excel file \"{Workbook.FullName}\".");
                 Workbook.Save();
-                ExcelApp.Quit();
+                //ExcelApp.Quit();
                 SimpleLog.Info($"Excel file \"{Workbook.FullName}\" saved.");
                 return true;
             }
@@ -275,7 +275,6 @@ namespace SpätzleCrawler
                 bool isEmpty = false;
                 for(int i = weekRow + 1; i <= weekRow + RealMatchesPerMatchday; i++)
                 {
-                    isEmpty = false;
                     var resValue = (double?)((Range)Worksheet.Cells[i, MatchdayTeam1ResultCol]).Value;
                     SimpleLog.Info($"Read Excel cell [{i},{MatchdayTeam1ResultCol}]: {resValue}");
                     isEmpty = !resValue.HasValue;
@@ -336,10 +335,12 @@ namespace SpätzleCrawler
         {
             SimpleLog.Info($"Write {userlist.SelectMany(x => x.Tips).Count()} usertips...");
 
-            for(int row = NextMatchdayRow + 1; row < NextMatchdayRow + RealMatchesPerMatchday; row++)
+            for(int row = NextMatchdayRow + 1; row <= NextMatchdayRow + RealMatchesPerMatchday; row++)
             {
                 // get match in row
                 var team1Name = (string)((Range)Worksheet.Cells[row, MatchdayTeam1Col]).Value;
+                if(String.IsNullOrWhiteSpace(team1Name))
+                    continue;
                 foreach(var user in userlist)
                 {
                     var match = user.Tips.FirstOrDefault(m => m.TeamA == team1Name);
