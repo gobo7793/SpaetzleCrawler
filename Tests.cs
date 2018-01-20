@@ -26,26 +26,22 @@ namespace SpätzleCrawler
         [Test]
         public void TestExcelReadUserList()
         {
-            var filename = ""; // insert file here
+            Settings.TargetFileName = ""; // insert file here
 
-            var excel = new ExcelHandler();
-            excel.OpenFile(filename);
-            var users = excel.ReadUserList();
+            var users = ExcelHandler.Handler.ReadUserList();
 
             Assert.AreEqual(20, users.Count);
-            Assert.AreEqual("", users[0]); // insert expected username here
-            Assert.AreEqual("", users[7]); // insert expected username here
-            Assert.AreEqual("", users[19]); // insert expected username here
+            Assert.AreEqual("", users[0].Name); // insert expected username here
+            Assert.AreEqual("", users[7].Name); // insert expected username here
+            Assert.AreEqual("", users[19].Name); // insert expected username here
         }
 
         [Test]
         public void TestExcelGetNextMatchday()
         {
-            var filename = ""; // insert file here
+            Settings.TargetFileName = ""; // insert file here
 
-            var excel = new ExcelHandler();
-            excel.OpenFile(filename);
-            var matchday = excel.GetNextMatchdayNo();
+            var matchday = ExcelHandler.Handler.ReadMatchdayNo();
 
             Assert.AreEqual(19, matchday); // insert expected matchday here
         }
@@ -53,21 +49,19 @@ namespace SpätzleCrawler
         [Test]
         public void TestExcelGetNextMatchdayMatches()
         {
-            var filename = @"E:\Dokumente\VS Projects\SpaetzleCrawler\spaetzle2018-1.xlsx"; // insert file here
+            Settings.TargetFileName = ""; // insert file here
 
-            var excel = new ExcelHandler();
-            excel.OpenFile(filename);
-            var matchday = excel.GetNextMatchdayMatches();
+            var matchday = ExcelHandler.Handler.GetNextMatchdayMatches();
 
             Assert.AreEqual(9, matchday.Count);
-            Assert.AreEqual(("Hoffenheim", "Leverkusen"), matchday[1]);
-            Assert.AreEqual(("Schalke", "Hannover"), matchday[8]);
+            Assert.AreEqual(new FootballMatch { TeamA = "", TeamB = "" }, matchday[1]); // insert expected match here
+            Assert.AreEqual(new FootballMatch { TeamA = "", TeamB = "" }, matchday[8]); // insert expected match here
         }
 
         [Test]
         public void TestCrawlerReadPages()
         {
-            var url =""; // insert url here
+            var url = ""; // insert url here
 
             var crawler = new Crawler();
             var pageCnt = crawler.ReadPages(url);
