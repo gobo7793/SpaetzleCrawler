@@ -62,6 +62,7 @@ namespace SpätzleCrawler
                     Console.WriteLine("No tips from users writed.");
                 ExcelHandler.Handler.Close();
 
+                Console.WriteLine("Finished! Press any key to exit.");
             }
             catch(Exception e)
             {
@@ -69,6 +70,7 @@ namespace SpätzleCrawler
                 SimpleLog.Log(e);
             }
 
+            Console.ReadKey();
         }
     }
 }

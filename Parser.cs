@@ -111,6 +111,16 @@ namespace SpätzleCrawler
                 SimpleLog.Info("Tips readed!");
                 Console.WriteLine($"Tips from user {post.Username} in post {post.Url} readed.");
             }
+
+            // Output not tipped
+            foreach(var user in Userlist)
+            {
+                if(user.Tips.Any())
+                    continue;
+
+                SimpleLog.Info($"User {user.Name} obviously not tipped.");
+                Console.WriteLine($"User {user.Name} obviously not tipped.");
+            }
         }
 
         /// <summary>
