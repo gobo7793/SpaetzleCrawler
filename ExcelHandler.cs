@@ -69,16 +69,16 @@ namespace SpätzleCrawler
         /// </summary>
         ~ExcelHandler()
         {
-            if(CouldUse)
-            {
-#if !DEBUG
-                //if(ExcelApp != null)
-                //{
-                //    ExcelApp.DisplayAlerts = false;
-                //    ExcelApp.Quit();
-                //}
-#endif
-            }
+//            if(CouldUse)
+//            {
+//#if !DEBUG
+//                if(ExcelApp != null)
+//                {
+//                    ExcelApp.DisplayAlerts = false;
+//                    ExcelApp.Quit();
+//                }
+//#endif
+//            }
 
             ExcelApp = null;
             Workbook = null;
@@ -111,15 +111,15 @@ namespace SpätzleCrawler
         /// </summary>
         public Worksheet Worksheet { get; set; }
 
-        /// <summary>
-        /// Indicates if Excel can be used
-        /// </summary>
-        public bool CanUse => ExcelApp != null && Workbook != null && Worksheet != null;
+        ///// <summary>
+        ///// Indicates if Excel can be used
+        ///// </summary>
+        //public bool CanUse => ExcelApp != null && Workbook != null && Worksheet != null;
 
-        /// <summary>
-        /// Indicates if Excel propably could be used
-        /// </summary>
-        public bool CouldUse => ExcelApp != null || Workbook != null || Worksheet != null;
+        ///// <summary>
+        ///// Indicates if Excel propably could be used
+        ///// </summary>
+        //public bool CouldUse => ExcelApp != null || Workbook != null || Worksheet != null;
 
         /// <summary>
         /// Row number for the next matchday
@@ -162,7 +162,7 @@ namespace SpätzleCrawler
         /// <returns>True if file saved successfully</returns>
         public bool Close()
         {
-            if(!CanUse) return false;
+            //if(!CanUse) return false;
 
             try
             {
