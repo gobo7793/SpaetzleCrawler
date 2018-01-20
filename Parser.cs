@@ -33,7 +33,7 @@ namespace SpätzleCrawler
         /// <summary>
         /// The real matches
         /// </summary>
-        public List<(string, string)> Matches { get; set; }
+        public List<FootballMatch> Matches { get; set; }
 
         /// <summary>
         /// The Userlist
@@ -43,7 +43,7 @@ namespace SpätzleCrawler
         /// <summary>
         /// The usermatches
         /// </summary>
-        public List<(User, User)> Usermatches { get; } = new List<(User, User)>();
+        public List<Usermatch> Usermatches { get; } = new List<Usermatch>();
 
         /// <summary>
         /// The thread posts
@@ -78,9 +78,9 @@ namespace SpätzleCrawler
                 foreach(var fullLine in lines)
                 {
                     var secLine = fullLine.Split(new[] {"Uhr"}, StringSplitOptions.None)[1];
-                    var realMatch = Matches.FirstOrDefault(m => secLine.Contains(m.Item1) && secLine.Contains(m.Item2));
+                    var realMatch = Matches.FirstOrDefault(m => secLine.Contains(m.TeamA) && secLine.Contains(m.TeamB));
                     var tipRegexMatch = matchTipRegex.Match(secLine);
-                    if(!tipRegexMatch.Success || realMatch.Equals(default((string, string))))
+                    if(!tipRegexMatch.Success || realMatch == null)
                     {
                         SimpleLog.Warning("Tips could not be readed!");
                         Console.WriteLine($"Tips could not be readed. User {post.Username} in post {post.Url}. Do it yourself.");
@@ -93,8 +93,8 @@ namespace SpätzleCrawler
                     // save tips
                     var footballMatch = new FootballMatch
                     {
-                        TeamA = realMatch.Item1,
-                        TeamB = realMatch.Item2,
+                        TeamA = realMatch.TeamA,
+                        TeamB = realMatch.TeamB,
                         ResultA = Int32.Parse(tipRegexMatch.Groups[1].Value),
                         ResultB = Int32.Parse(tipRegexMatch.Groups[2].Value),
                     };
@@ -150,7 +150,7 @@ namespace SpätzleCrawler
                 var user2 = Userlist.FirstOrDefault(u => u.Name == regexMatches[i].Groups[2].Value);
 
                 if(user1 != null && user2 != null)
-                    Usermatches.Add((user1, user2));
+                    Usermatches.Add(new Usermatch {UserA = user1, UserB = user2});
                 else
                 {
                     SimpleLog.Warning("Could not parse usermatches!");
@@ -170,7 +170,7 @@ namespace SpätzleCrawler
         /// <param name="userlist">The userlist</param>
         /// <param name="posts">The postlist</param>
         /// <returns></returns>
-        public static List<(User, User)> ParsePosts(List<(string, string)> matches, List<User> userlist, List<(string Url, string Username, string Content)> posts)
+        public static List<Usermatch> ParsePosts(List<FootballMatch> matches, List<User> userlist, List<(string Url, string Username, string Content)> posts)
         {
             var parser = new Parser
             {
