@@ -27,14 +27,14 @@ namespace SpätzleCrawler
     {
         public static void Main(string[] args)
         {
-            SimpleLog.StartLogging();
+            SimpleLog.SetLogFile("logs", writeText: true);
 
             try
             {
                 // read necessary data
                 FileHandler.ReadConfig(Settings.ConfigFileName);
 
-                var readUserTask = new Task<List<User>>(User.ReadUserList);
+                var readUserTask = new Task<List<User>>(ExcelHandler.Handler.ReadUserList);
                 readUserTask.Start();
                 Console.Write("URL current thread: ");
                 Settings.TipThreadUrl = Console.ReadLine();
@@ -51,7 +51,15 @@ namespace SpätzleCrawler
                 SimpleLog.Info("All data parsed.");
 
                 // saving all
+                if(ExcelHandler.Handler.WriteUsermatches(usermatches))
+                    Console.WriteLine("Matches between users writed.");
+                else
+                    Console.WriteLine("No matches between users writed.");
 
+                if(ExcelHandler.Handler.WriteUsertips(users))
+                    Console.WriteLine("Tips from users writed.");
+                else
+                    Console.WriteLine("No tips from users writed.");
 
             }
             catch(Exception e)
