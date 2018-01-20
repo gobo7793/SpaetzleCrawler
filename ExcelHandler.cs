@@ -18,11 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Mime;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Microsoft.Office.Interop.Excel;
 using SimpleLogger;
 
@@ -168,7 +163,7 @@ namespace SpätzleCrawler
 
         #endregion
 
-        #region Read/Write Data
+        #region Read Data
 
         /// <summary>
         /// Reads and returns the participating users list
@@ -268,6 +263,10 @@ namespace SpätzleCrawler
             }
             return -1;
         }
+
+        #endregion
+
+        #region Write Data
 
         #endregion
 

@@ -20,7 +20,6 @@ using System;
 using HtmlAgilityPack;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using SimpleLogger;
 
 namespace SpätzleCrawler
