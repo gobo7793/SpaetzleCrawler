@@ -2,9 +2,13 @@
 
 Gets the tips from all users of one league from the Spätzles Liga and saves it into a excel file. The excel file must be specific for the league and on the first worksheet must be for the tip entry. Note: The template for the excel file is currently not open source.
 
+## Requirements
+- .NET Framework 4.7
+- Microsoft Excel
+
 ## Run the crawler
 Note: All row/column indizes based on the worksheet for tip entries.
-1. Compile with Roslyn compiler/.NET 4.7
+1. Compile the source
 2. Create a textfile called `config.txt` in the directory of the exe file (mostly `bin\Debug` or `bin\Release`)
 3. Insert the full file path of the excel file in the first line in `config.txt`, like `C:\Users\<User>\Documents\league.xlsx`
 4. Enter the matches of the current Bundesliga matchday into columns `B` (home team) and `E` (away team)
