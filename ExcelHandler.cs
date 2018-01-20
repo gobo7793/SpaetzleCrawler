@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Office.Interop.Excel;
 using SimpleLogger;
 
@@ -36,14 +37,28 @@ namespace SpätzleCrawler
         public const int MaxMatchdayRow = 205;
         public const int MatchdayRowCount = 12;
 
+        public const int MatchdayTeam1Col = 2;
+        public const int MatchdayTeam1ResultCol = 3;
+        public const int MatchdayTeam2ResultCol = 4;
+        public const int MatchdayTeam2Col = 5;
+
         public const int FirstUserCol = 12;
         public const int MaxUserCol = 71;
         public const int UserColCount = 3;
+        public const int UserListRow = 2;
+
+        public const int UsermatchUser1Col = 7;
+        public const int UsermatchUser2Col = 10;
+
+        public const int RealMatchesPerMatchday = 9;
 
         #endregion
 
         #region Constructor
 
+        /// <summary>
+        /// Creates a new excel handler and opens <see cref="Settings.TargetFileName"/>
+        /// </summary>
         private ExcelHandler()
         {
             OpenFile(Settings.TargetFileName);
@@ -102,6 +117,11 @@ namespace SpätzleCrawler
         /// Indicates if Excel propably could be used
         /// </summary>
         public bool CouldUse => ExcelApp != null || Workbook != null || Worksheet != null;
+
+        /// <summary>
+        /// Row number for the next matchday
+        /// </summary>
+        public int NextMatchdayRow { get; set; }
 
         #endregion
 
@@ -169,22 +189,30 @@ namespace SpätzleCrawler
         /// Reads and returns the participating users list
         /// </summary>
         /// <returns>The participating usernames</returns>
-        public List<string> ReadUserList()
+        public List<User> ReadUserList()
         {
-            int row = 2;
+            SimpleLog.Info("Reading userlist...");
+
             int col = FirstUserCol;
 
-            var users = new List<string>();
+            var users = new List<User>();
             while(col < MaxUserCol)
             {
-                var cell = (Range)Worksheet.Cells[row, col];
+                var cell = (Range)Worksheet.Cells[UserListRow, col];
                 if(!cell.MergeCells)
                     break;
                 var cellVal = (string)cell.Value;
                 if(!String.IsNullOrWhiteSpace(cellVal))
-                    users.Add(cellVal);
+                {
+                    var user = new User
+                    {
+                        Name = cellVal,
+                        UserCol = col,
+                    };
+                    users.Add(user);
+                }
 
-                SimpleLog.Info($"Read Excel cell [{row},{col}]: {cellVal}");
+                SimpleLog.Info($"Read Excel cell [{UserListRow},{col}]: {cellVal}");
 
                 col += UserColCount;
             }
@@ -196,18 +224,18 @@ namespace SpätzleCrawler
         /// Reads an returns the matches of the next matchday
         /// </summary>
         /// <returns></returns>
-        public List<(string, string)> GetNextMatchdayMatches()
+        public List<FootballMatch> GetNextMatchdayMatches()
         {
-            var nextNo = GetNextMatchdayNo();
+            SimpleLog.Info("Reading next matchday matches...");
 
-            int team1Col = 2;
-            int team2Col = 5;
+            var nextNo = ReadMatchdayNo();
 
             // search current matchday row
             int matchdayRow;
             for(matchdayRow = FirstMatchdayRow; matchdayRow < MaxMatchdayRow; matchdayRow += MatchdayRowCount)
             {
                 var resValue = (double?)((Range)Worksheet.Cells[matchdayRow, MatchdayCol]).Value;
+                SimpleLog.Info($"Read Excel cell [{matchdayRow},{MatchdayCol}]: {resValue}");
                 if(resValue.HasValue && Math.Abs(resValue.Value - nextNo) < 0.1)
                 {
                     break;
@@ -215,12 +243,14 @@ namespace SpätzleCrawler
             }
 
             // Get teams
-            var matches = new List<(string, string)>();
-            for(int i = matchdayRow + 1; i <= matchdayRow + 9; i++)
+            var matches = new List<FootballMatch>();
+            for(int i = matchdayRow + 1; i <= matchdayRow + RealMatchesPerMatchday; i++)
             {
-                var team1 = (string)((Range)Worksheet.Cells[i, team1Col]).Value;
-                var team2 = (string)((Range)Worksheet.Cells[i, team2Col]).Value;
-                matches.Add((team1, team2));
+                var team1 = (string)((Range)Worksheet.Cells[i, MatchdayTeam1Col]).Value;
+                var team2 = (string)((Range)Worksheet.Cells[i, MatchdayTeam2Col]).Value;
+                SimpleLog.Info($"Read Excel cell [{i},{MatchdayTeam1Col}]: {team1}");
+                SimpleLog.Info($"Read Excel cell [{i},{MatchdayTeam2Col}]: {team2}");
+                matches.Add(new FootballMatch { TeamA = team1, TeamB = team2 });
             }
 
             return matches;
@@ -229,11 +259,14 @@ namespace SpätzleCrawler
         /// <summary>
         /// Reads and returns the number of the next not yet started matchday.
         /// Returns -1 if no matchday found.
+        /// Also saves the matchday on <see cref="Settings.NextMatchdayNo"/>.
         /// </summary>
         /// <returns>The next matchday number</returns>
-        public int GetNextMatchdayNo()
+        public int ReadMatchdayNo()
         {
-            int resCol = 3;
+            SimpleLog.Info("Reading next matchday number...");
+            var matchdayNo = -1;
+            NextMatchdayRow = FirstMatchdayRow;
 
             int weekRow = FirstMatchdayRow;
 
@@ -241,10 +274,11 @@ namespace SpätzleCrawler
             {
 
                 bool isEmpty = false;
-                for(int i = weekRow + 1; i <= weekRow + 9; i++)
+                for(int i = weekRow + 1; i <= weekRow + RealMatchesPerMatchday; i++)
                 {
                     isEmpty = false;
-                    var resValue = (double?)((Range)Worksheet.Cells[i, resCol]).Value;
+                    var resValue = (double?)((Range)Worksheet.Cells[i, MatchdayTeam1ResultCol]).Value;
+                    SimpleLog.Info($"Read Excel cell [{i},{MatchdayTeam1ResultCol}]: {resValue}");
                     isEmpty = !resValue.HasValue;
 
                     if(!isEmpty)
@@ -255,18 +289,71 @@ namespace SpätzleCrawler
                 if(isEmpty)
                 {
                     var weekValue = (double)((Range)Worksheet.Cells[weekRow, MatchdayCol]).Value;
-                    return Convert.ToInt32(weekValue);
+                    SimpleLog.Info($"Read Excel cell [{weekRow},{MatchdayCol}]: {weekValue}");
+                    matchdayNo = Convert.ToInt32(weekValue);
+                    NextMatchdayRow = weekRow;
+                    break;
                 }
 
                 // check next matchday if result cells are not empty
                 weekRow += MatchdayRowCount;
             }
-            return -1;
+
+            Settings.NextMatchdayNo = matchdayNo;
+            return matchdayNo;
         }
 
         #endregion
 
         #region Write Data
+
+        /// <summary>
+        /// Writes the usermatches to the excel file and returns true on matches to write
+        /// </summary>
+        /// <param name="usermatches">The usermatches</param>
+        /// <returns>True on matches to write</returns>
+        public bool WriteUsermatches(List<Usermatch> usermatches)
+        {
+            SimpleLog.Info($"Write {usermatches.Count} usermatches...");
+
+            for(int i = NextMatchdayRow; i < NextMatchdayRow + usermatches.Count; i++)
+            {
+                ((Range)Worksheet.Cells[i + 1, UsermatchUser1Col]).Value = usermatches[i].UserA.Name;
+                ((Range)Worksheet.Cells[i + 1, UsermatchUser2Col]).Value = usermatches[i].UserB.Name;
+                SimpleLog.Info($"Write Excel cell [{i + 1},{UsermatchUser1Col}]: {usermatches[i].UserA.Name}");
+                SimpleLog.Info($"Write Excel cell [{i + 1},{UsermatchUser2Col}]: {usermatches[i].UserB.Name}");
+            }
+
+            return usermatches.Any();
+        }
+
+        /// <summary>
+        /// Writes the tips of the user to the excel file and returns true on tips to write
+        /// </summary>
+        /// <param name="userlist">The userlist</param>
+        /// <returns>True on tips to write</returns>
+        public bool WriteUsertips(List<User> userlist)
+        {
+            SimpleLog.Info($"Write {userlist.SelectMany(x => x.Tips).Count()} usertips...");
+
+            for(int row = NextMatchdayRow + 1; row < NextMatchdayRow + RealMatchesPerMatchday; row++)
+            {
+                // get match in row
+                var team1Name = (string)((Range)Worksheet.Cells[row, MatchdayTeam1Col]).Value;
+                foreach(var user in userlist)
+                {
+                    var match = user.Tips.First(m => m.TeamA == team1Name);
+
+                    // write tip
+                    ((Range)Worksheet.Cells[row, user.UserCol]).Value = match.ResultA;
+                    ((Range)Worksheet.Cells[row, user.UserCol + 1]).Value = match.ResultB;
+                    SimpleLog.Info($"Write Excel cell [{row},{user.UserCol}]: {match.ResultA}");
+                    SimpleLog.Info($"Write Excel cell [{row},{user.UserCol + 1}]: {match.ResultB}");
+                }
+            }
+
+            return userlist.SelectMany(x => x.Tips).Any();
+        }
 
         #endregion
 
