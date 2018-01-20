@@ -60,6 +60,7 @@ namespace SpätzleCrawler
                     Console.WriteLine("Tips from users writed.");
                 else
                     Console.WriteLine("No tips from users writed.");
+                ExcelHandler.Handler.Close();
 
             }
             catch(Exception e)

@@ -104,9 +104,15 @@ namespace SpätzleCrawler
 
                     // read content
                     var contentTag = postNode.Descendants("div").First(d => d.GetClasses().Contains("forum-post-data"));
-                    var removeTag = contentTag.ChildNodes.LastOrDefault(c => c.Name == "div");
-                    if(removeTag != null)
-                        contentTag.RemoveChild(removeTag);
+                    var signature = contentTag.ChildNodes.FirstOrDefault(d => d.GetClasses().Contains("forum-signatur"));
+                    if(signature != null)
+                        contentTag.RemoveChild(signature);
+                    var quotes = contentTag.ChildNodes.Where(d => d.GetClasses().Contains("quote")).ToArray();
+                    for(int i = quotes.Length - 1; i >= 0; i--)
+                        contentTag.RemoveChild(quotes[i]);
+                    var edit = contentTag.ChildNodes.LastOrDefault(d => d.Name.Contains("code"));
+                    if(edit != null)
+                        contentTag.RemoveChild(edit);
 
                     Posts.Add((url, username, contentTag.InnerText.Trim()));
                 }

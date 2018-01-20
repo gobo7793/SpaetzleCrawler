@@ -39,9 +39,9 @@ namespace SpätzleCrawler
                 using(var sr = new StreamReader(filename))
                 {
                     var targetFile = sr.ReadLine();
-                    if(String.IsNullOrWhiteSpace(targetFile) || File.Exists(targetFile))
+                    if(String.IsNullOrWhiteSpace(targetFile) || !File.Exists(targetFile))
                         throw new InvalidDataException("Target xlsx filename could not be readed or file not found.");
-                    Settings.ConfigFileName = targetFile;
+                    Settings.TargetFileName = targetFile;
                 }
                 return true;
             }

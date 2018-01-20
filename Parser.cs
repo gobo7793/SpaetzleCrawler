@@ -71,39 +71,44 @@ namespace SpätzleCrawler
 
                 SimpleLog.Info($"User {post.Username} writed post {post.Url}.");
                 var user = Userlist.First(u => u.Name == post.Username);
+                if(user.Tips.Count == User.TippingGamesCount)
+                {
+                    SimpleLog.Warning($"User {post.Username} has already {User.TippingGamesCount} tips!");
+                    Console.WriteLine($"User {post.Username} has already {User.TippingGamesCount} tips. Skipping reading, please check the post {post.Url}.");
+                    continue;
+                }
 
                 // try parse tips
+                user.Tips.Clear();
                 var lines = _LineSplitterRegex.Split(post.Content);
-                bool mustBreak = false;
-                foreach(var fullLine in lines)
+                foreach(var line in lines)
                 {
-                    var secLine = fullLine.Split(new[] {"Uhr"}, StringSplitOptions.None)[1];
-                    var realMatch = Matches.FirstOrDefault(m => secLine.Contains(m.TeamA) && secLine.Contains(m.TeamB));
-                    var tipRegexMatch = matchTipRegex.Match(secLine);
-                    if(!tipRegexMatch.Success || realMatch == null)
-                    {
-                        SimpleLog.Warning("Tips could not be readed!");
-                        Console.WriteLine($"Tips could not be readed. User {post.Username} in post {post.Url}. Do it yourself.");
-
-                        user.Tips.Clear();
-                        mustBreak = true;
-                        break;
-                    }
+                    var realMatch = Matches.FirstOrDefault(m => line.ToLower().Contains(m.TeamA.ToLower()) && line.ToLower().Contains(m.TeamB.ToLower()));
+                    var tipRegexMatches = matchTipRegex.Matches(line);
+                    if(tipRegexMatches.Count != 2 || realMatch == null)
+                        continue;
 
                     // save tips
                     var footballMatch = new FootballMatch
                     {
                         TeamA = realMatch.TeamA,
                         TeamB = realMatch.TeamB,
-                        ResultA = Int32.Parse(tipRegexMatch.Groups[1].Value),
-                        ResultB = Int32.Parse(tipRegexMatch.Groups[2].Value),
+                        ResultA = Int32.Parse(tipRegexMatches[1].Groups[1].Value),
+                        ResultB = Int32.Parse(tipRegexMatches[1].Groups[2].Value),
                     };
                     user.Tips.Add(footballMatch);
                 }
 
-                if(mustBreak) break;
+                if(user.Tips.Count != User.TippingGamesCount)
+                {
+                    SimpleLog.Warning("Tips could not be readed!");
+                    Console.WriteLine($"Tips could not be readed. User {post.Username} in post {post.Url}. Do it yourself.");
 
-                SimpleLog.Warning("Tips readed!");
+                    user.Tips.Clear();
+                    break;
+                }
+
+                SimpleLog.Info("Tips readed!");
                 Console.WriteLine($"Tips from user {post.Username} in post {post.Url} readed.");
             }
         }
@@ -134,7 +139,7 @@ namespace SpätzleCrawler
             }
 
             // escape if not found
-            var userMatchRegex = new Regex(@"([^\s]+)\s*(?:\((?:A|N)\))?\s*:\s([^\s]+)\s*(?:\((?:A|N)\))?");
+            var userMatchRegex = new Regex(@"^([^\s]+)\s*(?:\((?:A|N)\))?\s*:\s([^\s]+)\s*(?:\((?:A|N)\))?$", RegexOptions.Multiline);
             var regexMatches = userMatchRegex.Matches(content);
             if(string.IsNullOrWhiteSpace(content) || regexMatches.Count == 0)
             {
@@ -144,13 +149,16 @@ namespace SpätzleCrawler
             }
 
             // parse
+            Usermatches.Clear();
             for(int i = 0; i < regexMatches.Count; i++)
             {
                 var user1 = Userlist.FirstOrDefault(u => u.Name == regexMatches[i].Groups[1].Value);
                 var user2 = Userlist.FirstOrDefault(u => u.Name == regexMatches[i].Groups[2].Value);
 
                 if(user1 != null && user2 != null)
-                    Usermatches.Add(new Usermatch {UserA = user1, UserB = user2});
+                    Usermatches.Add(new Usermatch { UserA = user1, UserB = user2 });
+                else if(Usermatches.Count == Userlist.Count / 2)
+                    return true;
                 else
                 {
                     SimpleLog.Warning("Could not parse usermatches!");

@@ -26,6 +26,11 @@ namespace SpätzleCrawler
     public class User
     {
         /// <summary>
+        /// Count of tipping games
+        /// </summary>
+        public const int TippingGamesCount = 9;
+
+        /// <summary>
         /// Usernick
         /// </summary>
         public string Name { get; set; }

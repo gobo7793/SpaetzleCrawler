@@ -143,7 +143,7 @@ namespace SpätzleCrawler
                     DisplayAlerts = false
 #endif
                 };
-                Workbook = ExcelApp.Workbooks.Open(filename);
+                Workbook = ExcelApp.Workbooks.Open(filename, Editable: true);
                 Worksheet = (Worksheet)Workbook.Sheets[1];
 
                 return true;
@@ -159,9 +159,8 @@ namespace SpätzleCrawler
         /// <summary>
         /// Saves the file to the fiven file name and returns true, if file saved succesfully.
         /// </summary>
-        /// <param name="fileName">File name for the file</param>
         /// <returns>True if file saved successfully</returns>
-        public bool Close(string fileName)
+        public bool Close()
         {
             if(!CanUse) return false;
 
@@ -316,12 +315,13 @@ namespace SpätzleCrawler
         {
             SimpleLog.Info($"Write {usermatches.Count} usermatches...");
 
-            for(int i = NextMatchdayRow; i < NextMatchdayRow + usermatches.Count; i++)
+            for(int i = 0; i < usermatches.Count; i++)
             {
-                ((Range)Worksheet.Cells[i + 1, UsermatchUser1Col]).Value = usermatches[i].UserA.Name;
-                ((Range)Worksheet.Cells[i + 1, UsermatchUser2Col]).Value = usermatches[i].UserB.Name;
-                SimpleLog.Info($"Write Excel cell [{i + 1},{UsermatchUser1Col}]: {usermatches[i].UserA.Name}");
-                SimpleLog.Info($"Write Excel cell [{i + 1},{UsermatchUser2Col}]: {usermatches[i].UserB.Name}");
+                var cellRow = NextMatchdayRow + 1 + i;
+                Worksheet.Cells[cellRow, UsermatchUser1Col] = usermatches[i].UserA.Name;
+                Worksheet.Cells[cellRow, UsermatchUser2Col] = usermatches[i].UserB.Name;
+                SimpleLog.Info($"Write Excel cell [{cellRow},{UsermatchUser1Col}]: {usermatches[i].UserA.Name}");
+                SimpleLog.Info($"Write Excel cell [{cellRow},{UsermatchUser2Col}]: {usermatches[i].UserB.Name}");
             }
 
             return usermatches.Any();
@@ -342,11 +342,13 @@ namespace SpätzleCrawler
                 var team1Name = (string)((Range)Worksheet.Cells[row, MatchdayTeam1Col]).Value;
                 foreach(var user in userlist)
                 {
-                    var match = user.Tips.First(m => m.TeamA == team1Name);
+                    var match = user.Tips.FirstOrDefault(m => m.TeamA == team1Name);
+                    if(match == null)
+                        continue;
 
                     // write tip
-                    ((Range)Worksheet.Cells[row, user.UserCol]).Value = match.ResultA;
-                    ((Range)Worksheet.Cells[row, user.UserCol + 1]).Value = match.ResultB;
+                    Worksheet.Cells[row, user.UserCol] = match.ResultA;
+                    Worksheet.Cells[row, user.UserCol + 1] = match.ResultB;
                     SimpleLog.Info($"Write Excel cell [{row},{user.UserCol}]: {match.ResultA}");
                     SimpleLog.Info($"Write Excel cell [{row},{user.UserCol + 1}]: {match.ResultB}");
                 }
