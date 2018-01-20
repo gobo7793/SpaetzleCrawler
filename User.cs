@@ -36,18 +36,24 @@ namespace SpätzleCrawler
         public List<FootballMatch> Tips { get; } = new List<FootballMatch>(9);
 
         /// <summary>
-        /// Reads the userlist
+        /// Base column of user in the excel file
         /// </summary>
-        /// <returns>The userlist</returns>
-        public static List<User> ReadUserList()
-        {
-            var users = ExcelHandler.Handler.ReadUserList();
-            var userlist = new List<User>();
-            foreach(var user in users)
-                userlist.Add(new User {Name = user});
-            return userlist;
-        }
+        public int UserCol { get; set; }
     }
 
+    /// <summary>
+    /// Represents a match between 2 <see cref="User"/>
+    /// </summary>
+    public class Usermatch
+    {
+        /// <summary>
+        /// The first <see cref="User"/>
+        /// </summary>
+        public User UserA { get; set; }
 
+        /// <summary>
+        /// The second <see cref="User"/>
+        /// </summary>
+        public User UserB { get; set; }
+    }
 }
