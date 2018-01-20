@@ -37,5 +37,10 @@ namespace SpätzleCrawler
         /// URL of the tipping thread
         /// </summary>
         public static string TipThreadUrl { get; set; }
+
+        /// <summary>
+        /// Number of the next real matchday
+        /// </summary>
+        public static int NextMatchdayNo { get; set; }
     }
 }
