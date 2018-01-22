@@ -14,13 +14,13 @@ Note: All row/column indizes based on the worksheet for tip entries.
 4. Enter the matches of the current Bundesliga matchday into columns `B` (home team) and `E` (away team)
     * All previously matchdays needed at least one result in column `C` (home goals)
     * The current matchday is the first matchday with no results in column `C`
-5. Start the crawler
+5. Start the crawler (no worry, it uses a command line)
 6. Enter the thread url of the current tipping thread
     * The userlist is stored in row `2` from column `L` to the first not merged cell in the row
 7. The crawler tries to parse the tips:
     * Download all pages in the thread, mostly 5 oder 6
     * Getting post data (URL, username and content without quotes)
-    * Parse the matches between the users
+    * Parse the matches between the users if one post with all usernames is found
     * Parse the tips from all users
     * Note if parsing is not successfully the crawler will write the post url to the console and log file
 8. The crawler save the matches between the users and their tips
