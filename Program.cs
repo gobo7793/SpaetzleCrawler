@@ -34,8 +34,7 @@ namespace SpätzleCrawler
                 // read necessary data
                 FileHandler.ReadConfig(Settings.ConfigFileName);
 
-                var readUserTask = new Task<List<User>>(ExcelHandler.Handler.ReadUserList);
-                readUserTask.Start();
+                var readUserTask = Task.Run(() => ExcelHandler.Handler.ReadUserList());
                 Console.Write("URL current thread: ");
                 Settings.TipThreadUrl = Console.ReadLine();
                 readUserTask.Wait();
