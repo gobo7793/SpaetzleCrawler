@@ -17,7 +17,6 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using SimpleLogger;
 
@@ -32,7 +31,9 @@ namespace SpätzleCrawler
             try
             {
                 // read necessary data
-                FileHandler.ReadConfig(Settings.ConfigFileName);
+                bool isConfigReaded = FileHandler.ReadConfig(Settings.ConfigFileName);
+                if(!isConfigReaded)
+                    throw new InvalidOperationException("Error while reading config file.");
 
                 var readUserTask = Task.Run(() => ExcelHandler.Handler.ReadUserList());
                 Console.Write("URL current thread: ");
