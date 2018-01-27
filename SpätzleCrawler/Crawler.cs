@@ -37,6 +37,11 @@ namespace SpätzleCrawler
         public List<(string Url, string Username, string Content)> Posts { get; } = new List<(string, string, string)>();
 
         /// <summary>
+        /// The league settings
+        /// </summary>
+        public Settings Settings { get; set; }
+
+        /// <summary>
         /// The TLD
         /// </summary>
         private string Domain { get; set; }
@@ -44,16 +49,15 @@ namespace SpätzleCrawler
         /// <summary>
         /// Downloads the source of the whole tipping thread and returns the founded page count
         /// </summary>
-        /// <param name="threadUrl">Thread URL</param>
         /// <returns>Founded pages count</returns>
-        public int ReadPages(string threadUrl)
+        public int ReadPages()
         {
             SimpleLog.Info("Read pages...");
-            var uri = new Uri(threadUrl);
+            var uri = new Uri(Settings.TipThreadUrl);
             Domain = $"{uri.Scheme}://{uri.Host}";
 
             var web = new HtmlWeb();
-            var mainPage = web.Load(threadUrl);
+            var mainPage = web.Load(Settings.TipThreadUrl);
 
             // Get page list
             var pager = mainPage.DocumentNode.Descendants("div").First(d => d.GetClasses().Contains("pager"));
@@ -122,13 +126,17 @@ namespace SpätzleCrawler
         }
 
         /// <summary>
-        /// Reads all pages of <see cref="Settings.TipThreadUrl"/> and returns their posts
+        /// Reads all pages and returns their posts
         /// </summary>
+        /// <param name="settings">The settings</param>
         /// <returns>All posts in the thread</returns>
-        public static List<(string Url, string Username, string Content)> GetPosts()
+        public static List<(string Url, string Username, string Content)> GetPosts(Settings settings)
         {
-            var crawler = new Crawler();
-            crawler.ReadPages(Settings.TipThreadUrl);
+            var crawler = new Crawler
+            {
+                Settings = settings,
+            };
+            crawler.ReadPages();
             crawler.ReadPosts();
             return crawler.Posts;
         }

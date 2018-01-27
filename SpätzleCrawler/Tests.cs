@@ -26,9 +26,11 @@ namespace SpätzleCrawler
         [Test]
         public void TestExcelReadUserList()
         {
-            Settings.TargetFileName = ""; // insert file here
+            var settings = new Settings { TargetFileName = "" }; // insert file here
 
-            var users = ExcelHandler.Handler.ReadUserList();
+            var excel = new ExcelHandler();
+            excel.OpenFile(settings.TargetFileName);
+            var users = excel.ReadUserList();
 
             Assert.AreEqual(20, users.Count);
             Assert.AreEqual("", users[0].Name); // insert expected username here
@@ -39,9 +41,11 @@ namespace SpätzleCrawler
         [Test]
         public void TestExcelGetNextMatchday()
         {
-            Settings.TargetFileName = ""; // insert file here
+            var settings = new Settings { TargetFileName = "" }; // insert file here
 
-            var matchday = ExcelHandler.Handler.ReadMatchdayNo();
+            var excel = new ExcelHandler();
+            excel.OpenFile(settings.TargetFileName);
+            var matchday = excel.ReadMatchdayNo();
 
             Assert.AreEqual(19, matchday); // insert expected matchday here
         }
@@ -49,9 +53,11 @@ namespace SpätzleCrawler
         [Test]
         public void TestExcelGetNextMatchdayMatches()
         {
-            Settings.TargetFileName = ""; // insert file here
+            var settings = new Settings { TargetFileName = "" }; // insert file here
 
-            var matchday = ExcelHandler.Handler.GetNextMatchdayMatches();
+            var excel = new ExcelHandler();
+            excel.OpenFile(settings.TargetFileName);
+            var matchday = excel.GetNextMatchdayMatches();
 
             Assert.AreEqual(9, matchday.Count);
             Assert.AreEqual(new FootballMatch { TeamA = "", TeamB = "" }, matchday[1]); // insert expected match here
@@ -61,10 +67,10 @@ namespace SpätzleCrawler
         [Test]
         public void TestCrawlerReadPages()
         {
-            var url = ""; // insert url here
+            var settings = new Settings { TipThreadUrl = "" }; // insert url here
 
-            var crawler = new Crawler();
-            var pageCnt = crawler.ReadPages(url);
+            var crawler = new Crawler { Settings = settings };
+            var pageCnt = crawler.ReadPages();
 
             Assert.AreEqual(0, pageCnt); // insert expected page count here
 
@@ -73,10 +79,10 @@ namespace SpätzleCrawler
         [Test]
         public void TestCrawlerReadPosts()
         {
-            var url = ""; // insert url here
+            var settings = new Settings { TipThreadUrl = "" }; // insert url here
 
-            var crawler = new Crawler();
-            crawler.ReadPages(url);
+            var crawler = new Crawler { Settings = settings };
+            crawler.ReadPages();
             var postCnt = crawler.ReadPosts();
 
             Assert.AreEqual(0, postCnt); // insert expected post count here

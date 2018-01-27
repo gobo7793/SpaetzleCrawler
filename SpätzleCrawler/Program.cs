@@ -78,7 +78,7 @@ namespace SpätzleCrawler
             SimpleLog.Info($"{users.Count} Users found. Use {settings.TipThreadUrl} to get tips.");
 
             // getting tips
-            var posts = Crawler.GetPosts();
+            var posts = Crawler.GetPosts(settings);
             SimpleLog.Info($"{posts.Count} posts found.");
             var usermatches = Parser.ParsePosts(matches, users, posts);
             SimpleLog.Info("All data parsed.");
