@@ -41,8 +41,10 @@ namespace SpätzleCrawler
                     var fileContent = sr.ReadLine();
                     if(fileContent == null) return false;
                     var targetFile = Environment.ExpandEnvironmentVariables(fileContent);
-                    if(String.IsNullOrWhiteSpace(targetFile) || !File.Exists(targetFile))
-                        throw new InvalidDataException("Target xlsx filename could not be readed or file not found.");
+                    if(String.IsNullOrWhiteSpace(targetFile))
+                        throw new InvalidDataException("Target xlsx filename could not be readed .");
+                    if(!File.Exists(targetFile))
+                        throw new InvalidDataException($"Target xlsx file \"{targetFile}\" not found.");
                     Settings.TargetFileName = targetFile;
                 }
                 return true;
