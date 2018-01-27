@@ -17,7 +17,9 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using SimpleLogger;
 
 namespace SpätzleCrawler
@@ -28,24 +30,57 @@ namespace SpätzleCrawler
     public class FileHandler
     {
         /// <summary>
-        /// Reads the config file and save it to <see cref="Settings"/>
+        /// Reads the config file and saves the league settings
         /// </summary>
         /// <param name="filename">The config filename</param>
+        /// <param name="settings">The league settings</param>
         /// <returns>True if settings loaded</returns>
-        public static bool ReadConfig(string filename)
+        /// <remarks>
+        /// Line Format: "League Name=C:\Path\to\file.xlsx"
+        /// Comments starting with #
+        /// </remarks>
+        public static bool ReadConfig(string filename, out List<Settings> settings)
         {
+            settings = new List<Settings>();
+            var settingRegex = new Regex(@"([^=]*)\s*=\s*(.*)");
             try
             {
                 using(var sr = new StreamReader(filename))
                 {
-                    var fileContent = sr.ReadLine();
-                    if(fileContent == null) return false;
-                    var targetFile = Environment.ExpandEnvironmentVariables(fileContent);
-                    if(String.IsNullOrWhiteSpace(targetFile))
-                        throw new InvalidDataException("Target xlsx filename could not be readed .");
-                    if(!File.Exists(targetFile))
-                        throw new InvalidDataException($"Target xlsx file \"{targetFile}\" not found.");
-                    Settings.TargetFileName = targetFile;
+                    while(!sr.EndOfStream)
+                    {
+                        var line = sr.ReadLine();
+                        if(String.IsNullOrWhiteSpace(line))
+                            continue;
+
+                        // Comment handling
+                        var relevantLineContent = line;
+                        if(line.Contains("#"))
+                        {
+                            var lineSplitted = line.Split('#');
+                            if(String.IsNullOrWhiteSpace(lineSplitted[0]))
+                                continue;
+
+                            relevantLineContent = lineSplitted[0];
+                        }
+
+                        // read settings
+                        var lineMatch = settingRegex.Match(relevantLineContent);
+                        if(!lineMatch.Success)
+                            throw new InvalidDataException("Config file format cannot be readed.");
+
+                        var targetFile = Environment.ExpandEnvironmentVariables(lineMatch.Groups[2].Value.Trim());
+                        var fi = new FileInfo(targetFile);
+                        if(!fi.Exists)
+                            throw new InvalidDataException($"Target xlsx file \"{targetFile}\" not found.");
+
+                        var setting = new Settings
+                        {
+                            LeagueName = lineMatch.Groups[1].Value.Trim(),
+                            TargetFileName = fi.FullName,
+                        };
+                        settings.Add(setting);
+                    }
                 }
                 return true;
             }

@@ -29,18 +29,23 @@ namespace SpätzleCrawler
         public static string ConfigFileName { get; set; } = "config.txt";
 
         /// <summary>
+        /// The league name
+        /// </summary>
+        public string LeagueName { get; set; }
+
+        /// <summary>
         /// File name of the target xlsx file
         /// </summary>
-        public static string TargetFileName { get; set; }
+        public string TargetFileName { get; set; }
 
         /// <summary>
         /// URL of the tipping thread
         /// </summary>
-        public static string TipThreadUrl { get; set; }
+        public string TipThreadUrl { get; set; }
 
         /// <summary>
         /// Number of the next real matchday
         /// </summary>
-        public static int NextMatchdayNo { get; set; }
+        public int NextMatchdayNo { get; set; }
     }
 }

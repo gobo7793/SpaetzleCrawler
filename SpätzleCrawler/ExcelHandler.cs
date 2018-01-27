@@ -56,29 +56,30 @@ namespace SpätzleCrawler
 
         #region Constructor
 
-        /// <summary>
-        /// Creates a new excel handler and opens <see cref="Settings.TargetFileName"/>
-        /// </summary>
-        private ExcelHandler()
-        {
-            OpenFile(Settings.TargetFileName);
-        }
+        ///// <summary>
+        ///// Creates a new excel handler and opens <see cref="Settings.TargetFileName"/>
+        ///// </summary>
+        ///// <param name="fileName">The file name to open</param>
+        //public ExcelHandler(string fileName)
+        //{
+        //    OpenFile(fileName);
+        //}
 
         /// <summary>
         /// Finalizer, close excel and release the resources
         /// </summary>
         ~ExcelHandler()
         {
-//            if(CouldUse)
-//            {
-//#if !DEBUG
-//                if(ExcelApp != null)
-//                {
-//                    ExcelApp.DisplayAlerts = false;
-//                    ExcelApp.Quit();
-//                }
-//#endif
-//            }
+            //            if(CouldUse)
+            //            {
+            //#if !DEBUG
+            //                if(ExcelApp != null)
+            //                {
+            //                    ExcelApp.DisplayAlerts = false;
+            //                    ExcelApp.Quit();
+            //                }
+            //#endif
+            //            }
 
             ExcelApp = null;
             Workbook = null;
@@ -88,13 +89,6 @@ namespace SpätzleCrawler
         #endregion
 
         #region Properties
-
-        private static ExcelHandler _Handler;
-
-        /// <summary>
-        /// The Excel Handler with the open <see cref="Settings.TargetFileName"/>
-        /// </summary>
-        public static ExcelHandler Handler => _Handler ?? (_Handler = new ExcelHandler());
 
         /// <summary>
         /// The current Excel Application
@@ -220,9 +214,9 @@ namespace SpätzleCrawler
         }
 
         /// <summary>
-        /// Reads an returns the matches of the next matchday
+        /// Reads an returns the <see cref="FootballMatch"/> of the next matchday
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The matches</returns>
         public List<FootballMatch> GetNextMatchdayMatches()
         {
             SimpleLog.Info("Reading next matchday matches...");
@@ -258,7 +252,6 @@ namespace SpätzleCrawler
         /// <summary>
         /// Reads and returns the number of the next not yet started matchday.
         /// Returns -1 if no matchday found.
-        /// Also saves the matchday on <see cref="Settings.NextMatchdayNo"/>.
         /// </summary>
         /// <returns>The next matchday number</returns>
         public int ReadMatchdayNo()
@@ -297,7 +290,6 @@ namespace SpätzleCrawler
                 weekRow += MatchdayRowCount;
             }
 
-            Settings.NextMatchdayNo = matchdayNo;
             return matchdayNo;
         }
 

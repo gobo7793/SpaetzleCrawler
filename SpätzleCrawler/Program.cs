@@ -17,6 +17,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using SimpleLogger;
 
@@ -28,49 +29,73 @@ namespace SpätzleCrawler
         {
             SimpleLog.SetLogFile("logs", writeText: true);
 
-            try
+            // read necessary data
+            List<Settings> settings;
+            bool isConfigReaded = FileHandler.ReadConfig(Settings.ConfigFileName, out settings);
+            if(!isConfigReaded)
             {
-                // read necessary data
-                bool isConfigReaded = FileHandler.ReadConfig(Settings.ConfigFileName);
-                if(!isConfigReaded)
-                    throw new InvalidOperationException("Error while reading config file.");
-
-                var readUserTask = Task.Run(() => ExcelHandler.Handler.ReadUserList());
-                Console.Write("URL current thread: ");
-                Settings.TipThreadUrl = Console.ReadLine();
-                readUserTask.Wait();
-                var users = readUserTask.Result;
-                var matches = ExcelHandler.Handler.GetNextMatchdayMatches();
-
-                SimpleLog.Info($"{users.Count} Users found. Use {Settings.TipThreadUrl} to get tips.");
-
-                // getting tips
-                var posts = Crawler.GetPosts();
-                SimpleLog.Info($"{posts.Count} posts found.");
-                var usermatches = Parser.ParsePosts(matches, users, posts);
-                SimpleLog.Info("All data parsed.");
-
-                // saving all
-                if(ExcelHandler.Handler.WriteUsermatches(usermatches))
-                    Console.WriteLine("Matches between users writed.");
-                else
-                    Console.WriteLine("No matches between users writed.");
-
-                if(ExcelHandler.Handler.WriteUsertips(users))
-                    Console.WriteLine("Tips from users writed.");
-                else
-                    Console.WriteLine("No tips from users writed.");
-                ExcelHandler.Handler.Close();
-
-                Console.WriteLine("Finished! Press any key to exit.");
+                var msg = "Error while reading config file. See log file for details.";
+                Console.WriteLine(msg);
+                SimpleLog.Log(msg);
             }
-            catch(Exception e)
+            else
             {
-                Console.WriteLine(e);
-                SimpleLog.Log(e);
+                foreach(var setting in settings)
+                {
+                    try
+                    {
+                        ParseLeague(setting);
+                    }
+                    catch(Exception e)
+                    {
+                        Console.WriteLine(e);
+                        SimpleLog.Log(e);
+                    }
+                }
             }
 
+            Console.WriteLine("Finished! Press any key to exit.");
             Console.ReadKey();
+        }
+
+        public static void ParseLeague(Settings settings)
+        {
+            Console.WriteLine($"Parsing {settings.LeagueName}.");
+            SimpleLog.Info($"Parsing {settings.LeagueName}.");
+
+            var excel = new ExcelHandler();
+            var readUserTask = Task.Run(() =>
+            {
+                excel.OpenFile(settings.TargetFileName);
+                return excel.ReadUserList();
+            });
+            Console.Write("URL current matchday thread: ");
+            settings.TipThreadUrl = Console.ReadLine();
+            readUserTask.Wait();
+            var users = readUserTask.Result;
+            var matches = excel.GetNextMatchdayMatches();
+
+            SimpleLog.Info($"{users.Count} Users found. Use {settings.TipThreadUrl} to get tips.");
+
+            // getting tips
+            var posts = Crawler.GetPosts();
+            SimpleLog.Info($"{posts.Count} posts found.");
+            var usermatches = Parser.ParsePosts(matches, users, posts);
+            SimpleLog.Info("All data parsed.");
+
+            // saving all
+            if(excel.WriteUsermatches(usermatches))
+                Console.WriteLine("Matches between users writed.");
+            else
+                Console.WriteLine("No matches between users writed.");
+
+            if(excel.WriteUsertips(users))
+                Console.WriteLine("Tips from users writed.");
+            else
+                Console.WriteLine("No tips from users writed.");
+            excel.Close();
+
+            Console.WriteLine();
         }
     }
 }
