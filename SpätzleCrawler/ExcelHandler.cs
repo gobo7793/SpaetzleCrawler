@@ -194,6 +194,7 @@ namespace SpätzleCrawler
                 var cell = (Range)Worksheet.Cells[UserListRow, col];
                 if(!cell.MergeCells)
                     break;
+                SimpleLog.Info($"Read Excel cell [{UserListRow},{col}]");
                 var cellVal = (string)cell.Value;
                 if(!String.IsNullOrWhiteSpace(cellVal))
                 {
@@ -204,8 +205,7 @@ namespace SpätzleCrawler
                     };
                     users.Add(user);
                 }
-
-                SimpleLog.Info($"Read Excel cell [{UserListRow},{col}]: {cellVal}");
+                SimpleLog.Info($"User found: {cellVal}");
 
                 col += UserColCount;
             }
@@ -227,8 +227,8 @@ namespace SpätzleCrawler
             int matchdayRow;
             for(matchdayRow = FirstMatchdayRow; matchdayRow < MaxMatchdayRow; matchdayRow += MatchdayRowCount)
             {
+                SimpleLog.Info($"Read Excel cell [{matchdayRow},{MatchdayCol}]");
                 var resValue = (double?)((Range)Worksheet.Cells[matchdayRow, MatchdayCol]).Value;
-                SimpleLog.Info($"Read Excel cell [{matchdayRow},{MatchdayCol}]: {resValue}");
                 if(resValue.HasValue && Math.Abs(resValue.Value - nextNo) < 0.1)
                 {
                     break;
@@ -239,10 +239,10 @@ namespace SpätzleCrawler
             var matches = new List<FootballMatch>();
             for(int i = matchdayRow + 1; i <= matchdayRow + RealMatchesPerMatchday; i++)
             {
+                SimpleLog.Info($"Read Excel cell [{i},{MatchdayTeam1Col}]");
                 var team1 = (string)((Range)Worksheet.Cells[i, MatchdayTeam1Col]).Value;
+                SimpleLog.Info($"Read Excel cell [{i},{MatchdayTeam2Col}]");
                 var team2 = (string)((Range)Worksheet.Cells[i, MatchdayTeam2Col]).Value;
-                SimpleLog.Info($"Read Excel cell [{i},{MatchdayTeam1Col}]: {team1}");
-                SimpleLog.Info($"Read Excel cell [{i},{MatchdayTeam2Col}]: {team2}");
                 matches.Add(new FootballMatch { TeamA = team1, TeamB = team2 });
             }
 
@@ -268,8 +268,8 @@ namespace SpätzleCrawler
                 bool isEmpty = false;
                 for(int i = weekRow + 1; i <= weekRow + RealMatchesPerMatchday; i++)
                 {
+                    SimpleLog.Info($"Read Excel cell [{i},{MatchdayTeam1ResultCol}]");
                     var resValue = (double?)((Range)Worksheet.Cells[i, MatchdayTeam1ResultCol]).Value;
-                    SimpleLog.Info($"Read Excel cell [{i},{MatchdayTeam1ResultCol}]: {resValue}");
                     isEmpty = !resValue.HasValue;
 
                     if(!isEmpty)
@@ -279,8 +279,8 @@ namespace SpätzleCrawler
                 // if result cells are all empty, return matchday number
                 if(isEmpty)
                 {
+                    SimpleLog.Info($"Read Excel cell [{weekRow},{MatchdayCol}]");
                     var weekValue = (double)((Range)Worksheet.Cells[weekRow, MatchdayCol]).Value;
-                    SimpleLog.Info($"Read Excel cell [{weekRow},{MatchdayCol}]: {weekValue}");
                     matchdayNo = Convert.ToInt32(weekValue);
                     NextMatchdayRow = weekRow;
                     break;
@@ -309,10 +309,10 @@ namespace SpätzleCrawler
             for(int i = 0; i < usermatches.Count; i++)
             {
                 var cellRow = NextMatchdayRow + 1 + i;
-                Worksheet.Cells[cellRow, UsermatchUser1Col] = usermatches[i].UserA.Name;
-                Worksheet.Cells[cellRow, UsermatchUser2Col] = usermatches[i].UserB.Name;
                 SimpleLog.Info($"Write Excel cell [{cellRow},{UsermatchUser1Col}]: {usermatches[i].UserA.Name}");
+                Worksheet.Cells[cellRow, UsermatchUser1Col] = usermatches[i].UserA.Name;
                 SimpleLog.Info($"Write Excel cell [{cellRow},{UsermatchUser2Col}]: {usermatches[i].UserB.Name}");
+                Worksheet.Cells[cellRow, UsermatchUser2Col] = usermatches[i].UserB.Name;
             }
 
             return usermatches.Any();
@@ -340,10 +340,10 @@ namespace SpätzleCrawler
                         continue;
 
                     // write tip
-                    Worksheet.Cells[row, user.UserCol] = match.ResultA;
-                    Worksheet.Cells[row, user.UserCol + 1] = match.ResultB;
                     SimpleLog.Info($"Write Excel cell [{row},{user.UserCol}]: {match.ResultA}");
+                    Worksheet.Cells[row, user.UserCol] = match.ResultA;
                     SimpleLog.Info($"Write Excel cell [{row},{user.UserCol + 1}]: {match.ResultB}");
+                    Worksheet.Cells[row, user.UserCol + 1] = match.ResultB;
                 }
             }
 
