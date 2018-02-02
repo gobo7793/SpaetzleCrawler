@@ -136,6 +136,7 @@ namespace SpätzleCrawler
                 {
                     Visible = true,
                     DisplayAlerts = false,
+                    AskToUpdateLinks = false,
                 };
                 Workbook = ExcelApp.Workbooks.Open(filename, Editable: true);
                 Worksheet = (Worksheet)Workbook.Sheets[1];
@@ -163,12 +164,12 @@ namespace SpätzleCrawler
                 SimpleLog.Info($"Save Excel file \"{Workbook.FullName}\".");
                 Workbook.Save();
                 //ExcelApp.Quit();
-                SimpleLog.Info($"Excel file \"{Workbook.FullName}\" saved.");
+                SimpleLog.Info("Excel file saved.");
                 return true;
             }
             catch(Exception e)
             {
-                SimpleLog.Log($"Failed to write file \"{Workbook.FullName}\".");
+                SimpleLog.Log("Failed to write file.");
                 SimpleLog.Error(e.ToString());
             }
             return false;
@@ -187,12 +188,12 @@ namespace SpätzleCrawler
                 SimpleLog.Info($"Closing Excel file \"{Workbook.FullName}\".");
                 //Workbook.Save();
                 ExcelApp.Quit();
-                SimpleLog.Info($"Excel file \"{Workbook.FullName}\" closed.");
+                SimpleLog.Info("Excel closed.");
                 return true;
             }
             catch(Exception e)
             {
-                SimpleLog.Log($"Failed to close file \"{Workbook.FullName}\".");
+                SimpleLog.Log("Failed to close excel.");
                 SimpleLog.Error(e.ToString());
             }
             return false;
