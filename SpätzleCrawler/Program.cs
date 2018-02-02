@@ -73,6 +73,11 @@ namespace SpätzleCrawler
             settings.TipThreadUrl = Console.ReadLine();
             readUserTask.Wait();
             var users = readUserTask.Result;
+            if(String.IsNullOrWhiteSpace(settings.TipThreadUrl))
+            {
+                excel.CloseFile();
+                return; // cancel execution
+            }
             var matches = excel.GetNextMatchdayMatches();
 
             SimpleLog.Info($"{users.Count} Users found. Use {settings.TipThreadUrl} to get tips.");
@@ -93,7 +98,7 @@ namespace SpätzleCrawler
                 Console.WriteLine("Tips from users writed.");
             else
                 Console.WriteLine("No tips from users writed.");
-            excel.Close();
+            excel.SaveFile();
 
             Console.WriteLine();
         }

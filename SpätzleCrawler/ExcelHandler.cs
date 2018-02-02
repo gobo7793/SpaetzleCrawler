@@ -154,7 +154,7 @@ namespace SpätzleCrawler
         /// Saves the file to the fiven file name and returns true, if file saved succesfully.
         /// </summary>
         /// <returns>True if file saved successfully</returns>
-        public bool Close()
+        public bool SaveFile()
         {
             //if(!CanUse) return false;
 
@@ -169,6 +169,30 @@ namespace SpätzleCrawler
             catch(Exception e)
             {
                 SimpleLog.Log($"Failed to write file \"{Workbook.FullName}\".");
+                SimpleLog.Error(e.ToString());
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Closes the file and excel and returns true on success
+        /// </summary>
+        /// <returns>True if excel closed successfully</returns>
+        public bool CloseFile()
+        {
+            //if(!CanUse) return false;
+
+            try
+            {
+                SimpleLog.Info($"Closing Excel file \"{Workbook.FullName}\".");
+                //Workbook.Save();
+                ExcelApp.Quit();
+                SimpleLog.Info($"Excel file \"{Workbook.FullName}\" closed.");
+                return true;
+            }
+            catch(Exception e)
+            {
+                SimpleLog.Log($"Failed to close file \"{Workbook.FullName}\".");
                 SimpleLog.Error(e.ToString());
             }
             return false;
