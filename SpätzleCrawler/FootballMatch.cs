@@ -16,11 +16,14 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endregion
 
+using System.Diagnostics;
+
 namespace SpätzleCrawler
 {
     /// <summary>
     /// Represents a football match
     /// </summary>
+    [DebuggerDisplay("{" + nameof(TeamA) + "}-{" + nameof(TeamB) + "}")]
     public class FootballMatch
     {
         /// <summary>

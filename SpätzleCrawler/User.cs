@@ -17,12 +17,14 @@
 #endregion
 
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace SpätzleCrawler
 {
     /// <summary>
     /// Represents an user who tips a <see cref="FootballMatch"/>
     /// </summary>
+    [DebuggerDisplay("{" + nameof(Name) + "}")]
     public class User
     {
         /// <summary>
@@ -49,6 +51,7 @@ namespace SpätzleCrawler
     /// <summary>
     /// Represents a match between 2 <see cref="User"/>
     /// </summary>
+    [DebuggerDisplay("{" + nameof(UserA) + "}-{" + nameof(UserB) + "}")]
     public class Usermatch
     {
         /// <summary>
