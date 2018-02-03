@@ -53,7 +53,7 @@ namespace SpätzleCrawler
         /// <summary>
         /// Helper regex for line splitting
         /// </summary>
-        private Regex _LineSplitterRegex => new Regex(@"\r\n|\r|\n");
+        private Regex LineSplitterRegex => new Regex(@"\r\n|\r|\n");
 
         /// <summary>
         /// Parses the match tips
@@ -62,25 +62,25 @@ namespace SpätzleCrawler
         {
             SimpleLog.Info("Parse match tips from user...");
 
-            var matchTipRegex = new Regex(@"(\d+)(?::|-)(\d+)");
-            var nicks = Userlist.Select(u => u.Name).ToArray();
-            foreach(var post in Posts)
+            var matchTipRegex = new Regex(@"(\d+)\s*(?::|-)\s*(\d+)");
+            var nicks = Userlist.Select(u => u.Name.ToLower()).ToArray();
+            foreach(var (url, username, content) in Posts)
             {
-                if(!nicks.Contains(post.Username))
+                if(!nicks.Contains(username.ToLower()))
                     continue;
 
-                SimpleLog.Info($"User {post.Username} writed post {post.Url}.");
-                var user = Userlist.First(u => u.Name == post.Username);
+                SimpleLog.Info($"User {username} writed post {url}.");
+                var user = Userlist.First(u => u.Name.ToLower() == username.ToLower());
                 if(user.Tips.Count == User.TippingGamesCount)
                 {
-                    SimpleLog.Warning($"User {post.Username} has already {User.TippingGamesCount} tips!");
-                    Console.WriteLine($"User {post.Username} has already {User.TippingGamesCount} tips. Skipping reading, please check the post {post.Url}.");
+                    SimpleLog.Warning($"User {username} has already {User.TippingGamesCount} tips!");
+                    Console.WriteLine($"User {username} has already {User.TippingGamesCount} tips. Skipping reading, please check the post {url}.");
                     continue;
                 }
 
                 // try parse tips
                 user.Tips.Clear();
-                var lines = _LineSplitterRegex.Split(post.Content);
+                var lines = LineSplitterRegex.Split(content);
                 foreach(var line in lines)
                 {
                     var realMatch = Matches.FirstOrDefault(m => line.ToLower().Contains(m.TeamA.ToLower()) && line.ToLower().Contains(m.TeamB.ToLower()));
@@ -102,14 +102,14 @@ namespace SpätzleCrawler
                 if(user.Tips.Count != User.TippingGamesCount)
                 {
                     SimpleLog.Warning("Tips could not be readed!");
-                    Console.WriteLine($"Tips could not be readed. User {post.Username} in post {post.Url}. Do it yourself.");
+                    Console.WriteLine($"Tips could not be readed. User {username} in post {url}. Do it yourself.");
 
                     user.Tips.Clear();
                     break;
                 }
 
                 SimpleLog.Info("Tips readed!");
-                Console.WriteLine($"Tips from user {post.Username} in post {post.Url} readed.");
+                Console.WriteLine($"Tips from user {username} in post {url} readed.");
             }
 
             // Output not tipped
@@ -132,26 +132,26 @@ namespace SpätzleCrawler
             SimpleLog.Info("Parse usermatches...");
 
             // search post
-            string content = String.Empty;
-            string url = String.Empty;
-            foreach(var post in Posts)
+            string postContent = String.Empty;
+            string postUrl = String.Empty;
+            foreach(var (url, _, content) in Posts)
             {
-                var postText = post.Content.ToLower();
+                var postText = content.ToLower();
                 bool matches = Userlist.Select(u => u.Name).All(u => postText.Contains(u.ToLower()));
 
                 if(matches)
                 {
-                    content = post.Content;
-                    url = post.Url;
-                    SimpleLog.Info($"Post with usermatches: {url}");
+                    postContent = content;
+                    postUrl = url;
+                    SimpleLog.Info($"Post with usermatches: {postUrl}");
                     break;
                 }
             }
 
             // escape if not found
             var userMatchRegex = new Regex(@"^([^\s]+)\s*(?:\((?:A|N)\))?\s*:\s([^\s]+)\s*(?:\((?:A|N)\))?$", RegexOptions.Multiline);
-            var regexMatches = userMatchRegex.Matches(content);
-            if(string.IsNullOrWhiteSpace(content) || regexMatches.Count == 0)
+            var regexMatches = userMatchRegex.Matches(postContent);
+            if(String.IsNullOrWhiteSpace(postContent) || regexMatches.Count == 0)
             {
                 SimpleLog.Warning("Could not find post with usermatches!");
                 Console.WriteLine("Could not find post with usermatches. Please insert it manually.");
@@ -169,13 +169,15 @@ namespace SpätzleCrawler
                     Usermatches.Add(new Usermatch { UserA = user1, UserB = user2 });
                 else if(Usermatches.Count == Userlist.Count / 2)
                     return true;
-                else
-                {
-                    SimpleLog.Warning("Could not parse usermatches!");
-                    Console.WriteLine($"Could not parse usermatches from {url}. Do it yourself.");
-                    Usermatches.Clear();
-                    return false;
-                }
+            }
+
+
+            if(Usermatches.Count != Userlist.Count / 2)
+            {
+                SimpleLog.Warning("Could not parse usermatches!");
+                Console.WriteLine($"Could not parse usermatches from {postUrl}. Do it yourself.");
+                Usermatches.Clear();
+                return false;
             }
 
             return true;

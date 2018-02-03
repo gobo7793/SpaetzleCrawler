@@ -30,8 +30,7 @@ namespace SpätzleCrawler
             SimpleLog.SetLogFile("logs", writeText: true);
 
             // read necessary data
-            List<Settings> settings;
-            bool isConfigReaded = FileHandler.ReadConfig(Settings.ConfigFileName, out settings);
+            var isConfigReaded = FileHandler.ReadConfig(Settings.ConfigFileName, out List<Settings> settings);
             if(!isConfigReaded)
             {
                 var msg = "Error while reading config file. See log file for details.";
