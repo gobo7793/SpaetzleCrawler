@@ -62,7 +62,7 @@ namespace SpätzleCrawler
         {
             SimpleLog.Info("Parse match tips from user...");
 
-            var matchTipRegex = new Regex(@"(\d+)\s*(?::|-|\.)\s*(\d+)");
+            var matchTipRegex = new Regex(@"(\d+)\s*(?::|-)\s*(\d+)");
             var nicks = Userlist.Select(u => u.Name.ToLower()).ToArray();
             foreach(var (url, username, content) in Posts)
             {
@@ -106,7 +106,7 @@ namespace SpätzleCrawler
                     Console.WriteLine($"Tips could not be readed. User {username} in post {url}. Do it yourself.");
 
                     user.Tips.Clear();
-                    break;
+                    continue;
                 }
 
                 SimpleLog.Info("Tips readed!");

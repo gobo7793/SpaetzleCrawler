@@ -294,8 +294,11 @@ namespace SpätzleCrawler
                 for(int i = weekRow + 1; i <= weekRow + RealMatchesPerMatchday; i++)
                 {
                     SimpleLog.Info($"Read Excel cell [{i},{MatchdayTeam1ResultCol}]");
-                    var resValue = (double?)((Range)Worksheet.Cells[i, MatchdayTeam1ResultCol]).Value;
-                    isEmpty = !resValue.HasValue;
+                    if(((Range)Worksheet.Cells[i, MatchdayTeam1ResultCol]).HasFormula)
+                        ((Range)Worksheet.Cells[i, MatchdayTeam1ResultCol]).Calculate();
+                    var resValue = ((Range)Worksheet.Cells[i, MatchdayTeam1ResultCol]).Value.ToString();
+                    isEmpty = !Int32.TryParse(resValue, out int _);
+                    //isEmpty = !resValue.HasValue;
 
                     if(!isEmpty)
                         break; // break if result cells are not empty
