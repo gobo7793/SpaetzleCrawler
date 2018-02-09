@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Microsoft.Office.Interop.Excel;
 using SimpleLogger;
 
@@ -78,20 +79,21 @@ namespace SpätzleCrawler
         /// </summary>
         public void Dispose()
         {
-            //            if(CouldUse)
-            //            {
-            //#if !DEBUG
-            //                if(ExcelApp != null)
-            //                {
-            //                    ExcelApp.DisplayAlerts = false;
-            //                    ExcelApp.Quit();
-            //                }
-            //#endif
-            //            }
-
-            ExcelApp = null;
-            Workbook = null;
-            Worksheet = null;
+            if(Worksheet != null)
+            {
+                Marshal.FinalReleaseComObject(Worksheet);
+                Worksheet = null;
+            }
+            if(Workbook != null)
+            {
+                Marshal.FinalReleaseComObject(Workbook);
+                Workbook = null;
+            }
+            if(ExcelApp != null)
+            {
+                Marshal.FinalReleaseComObject(ExcelApp);
+                ExcelApp = null;
+            }
         }
 
         #endregion
@@ -165,13 +167,10 @@ namespace SpätzleCrawler
         /// <returns>True if file saved successfully</returns>
         public bool SaveFile()
         {
-            //if(!CanUse) return false;
-
             try
             {
                 SimpleLog.Info($"Save Excel file \"{Workbook.FullName}\".");
-                Workbook.Save();
-                //ExcelApp.Quit();
+                Workbook?.Save();
                 SimpleLog.Info("Excel file saved.");
                 return true;
             }
@@ -194,8 +193,9 @@ namespace SpätzleCrawler
             try
             {
                 SimpleLog.Info($"Closing Excel file \"{Workbook.FullName}\".");
-                //Workbook.Save();
-                ExcelApp.Quit();
+                Workbook?.Close();
+                ExcelApp?.Quit();
+                Dispose();
                 SimpleLog.Info("Excel closed.");
                 return true;
             }
