@@ -53,8 +53,11 @@ namespace SpätzleCrawler
                 }
             }
 
-            Console.WriteLine("Finished! Press any key to exit.");
-            Console.ReadKey();
+            Console.WriteLine("Finished! Press l to view logs or any other key to exit.");
+            var key = Console.ReadKey();
+            if(key.KeyChar == 'l' || key.KeyChar == 'L')
+                SimpleLog.ShowLogFile();
+            SimpleLog.StopLogging();
         }
 
         public static void ParseLeague(Settings settings)
