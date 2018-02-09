@@ -53,10 +53,13 @@ namespace SpätzleCrawler
                 }
             }
 
-            Console.WriteLine("Finished! Press l to view logs or any other key to exit.");
+            Console.WriteLine("Finished! Press l to view logs, c to close all excel instances or any other key to exit.");
             var key = Console.ReadKey();
             if(key.KeyChar == 'l' || key.KeyChar == 'L')
                 SimpleLog.ShowLogFile();
+            if(key.KeyChar == 'c' || key.KeyChar == 'C')
+                foreach(var s in settings)
+                    s.Excel.CloseFile();
             SimpleLog.StopLogging();
         }
 
@@ -65,11 +68,11 @@ namespace SpätzleCrawler
             Console.WriteLine($"Parsing {settings.LeagueName}.");
             SimpleLog.Info($"Parsing {settings.LeagueName}.");
 
-            var excel = new ExcelHandler();
+            settings.Excel = new ExcelHandler();
             var readUserTask = Task.Run(() =>
             {
-                excel.OpenFile(settings.TargetFileName);
-                return excel.ReadUserList();
+                settings.Excel.OpenFile(settings.TargetFileName);
+                return settings.Excel.ReadUserList();
             });
             Console.Write("URL current matchday thread: ");
             settings.TipThreadUrl = Console.ReadLine();
@@ -77,10 +80,10 @@ namespace SpätzleCrawler
             var users = readUserTask.Result;
             if(String.IsNullOrWhiteSpace(settings.TipThreadUrl))
             {
-                excel.CloseFile();
+                settings.Excel.CloseFile();
                 return; // cancel execution
             }
-            var matches = excel.GetNextMatchdayMatches();
+            var matches = settings.Excel.GetNextMatchdayMatches();
 
             SimpleLog.Info($"{users.Count} Users found. Use {settings.TipThreadUrl} to get tips.");
 
@@ -91,16 +94,16 @@ namespace SpätzleCrawler
             SimpleLog.Info("All data parsed.");
 
             // saving all
-            if(excel.WriteUsermatches(usermatches))
+            if(settings.Excel.WriteUsermatches(usermatches))
                 Console.WriteLine("Matches between users writed.");
             else
                 Console.WriteLine("No matches between users writed.");
 
-            if(excel.WriteUsertips(users))
+            if(settings.Excel.WriteUsertips(users))
                 Console.WriteLine("Tips from users writed.");
             else
                 Console.WriteLine("No tips from users writed.");
-            excel.SaveFile();
+            settings.Excel.SaveFile();
 
             Console.WriteLine();
         }

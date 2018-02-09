@@ -47,5 +47,10 @@ namespace SpätzleCrawler
         /// Number of the next real matchday
         /// </summary>
         public int NextMatchdayNo { get; set; }
+
+        /// <summary>
+        /// The open excel instance
+        /// </summary>
+        public ExcelHandler Excel { get; set; }
     }
 }

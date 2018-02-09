@@ -28,7 +28,7 @@ namespace SpätzleCrawler
     /// Handler for Excel Files
     /// Works only if MS Excel is installed on the local machine.
     /// </summary>
-    public class ExcelHandler
+    public class ExcelHandler : IDisposable
     {
         #region Constants
 
@@ -69,6 +69,14 @@ namespace SpätzleCrawler
         /// Finalizer, close excel and release the resources
         /// </summary>
         ~ExcelHandler()
+        {
+            Dispose();
+        }
+
+        /// <summary>
+        /// Finalizer, close excel and release the resources
+        /// </summary>
+        public void Dispose()
         {
             //            if(CouldUse)
             //            {
@@ -296,7 +304,7 @@ namespace SpätzleCrawler
                     SimpleLog.Info($"Read Excel cell [{i},{MatchdayTeam1ResultCol}]");
                     if(((Range)Worksheet.Cells[i, MatchdayTeam1ResultCol]).HasFormula)
                         ((Range)Worksheet.Cells[i, MatchdayTeam1ResultCol]).Calculate();
-                    var resValue = ((Range)Worksheet.Cells[i, MatchdayTeam1ResultCol]).Value.ToString();
+                    var resValue = ((Range)Worksheet.Cells[i, MatchdayTeam1ResultCol]).Value?.ToString();
                     isEmpty = !Int32.TryParse(resValue, out int _);
                     //isEmpty = !resValue.HasValue;
 
