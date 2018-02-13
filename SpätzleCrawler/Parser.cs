@@ -62,7 +62,7 @@ namespace SpätzleCrawler
         {
             SimpleLog.Info("Parse match tips from user...");
 
-            var matchTipRegex = new Regex(@"(\d+)\s*(?::|-)\s*(\d+)");
+            var matchTipRegex = new Regex(@"(\d+)\s*(?::|-)\s*(\d+)", RegexOptions.RightToLeft);
             var nicks = Userlist.Select(u => u.Name.ToLower()).ToArray();
             foreach(var (url, username, content) in Posts)
             {
@@ -85,17 +85,17 @@ namespace SpätzleCrawler
                 {
                     var realMatch = Matches.FirstOrDefault(m => line.ToLower().Contains(m.TeamA.ToLower()) && line.ToLower().Contains(m.TeamB.ToLower()));
                     var tipRegexMatches = matchTipRegex.Matches(line);
-                    if(tipRegexMatches.Count < 1 || realMatch == null)
+                    if(tipRegexMatches.Count < 2 || realMatch == null)
                         continue;
 
-                    var tipMatchIndex = tipRegexMatches.Count - 1;
+                    //var tipMatchIndex = tipRegexMatches.Count - 1;
                     // save tips
                     var footballMatch = new FootballMatch
                     {
                         TeamA = realMatch.TeamA,
                         TeamB = realMatch.TeamB,
-                        ResultA = Int32.Parse(tipRegexMatches[tipMatchIndex].Groups[1].Value),
-                        ResultB = Int32.Parse(tipRegexMatches[tipMatchIndex].Groups[2].Value),
+                        ResultA = Int32.Parse(tipRegexMatches[1].Groups[1].Value),
+                        ResultB = Int32.Parse(tipRegexMatches[1].Groups[2].Value),
                     };
                     user.Tips.Add(footballMatch);
                 }
