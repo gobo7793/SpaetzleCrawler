@@ -83,19 +83,23 @@ namespace SpätzleCrawler
                 var lines = LineSplitterRegex.Split(content);
                 foreach(var line in lines)
                 {
-                    var realMatch = Matches.FirstOrDefault(m => line.ToLower().Contains(m.TeamA.ToLower()) && line.ToLower().Contains(m.TeamB.ToLower()));
+                    var realMatch =
+                        Matches.FirstOrDefault(m => !String.IsNullOrWhiteSpace(m.TeamA) &&
+                                                    !String.IsNullOrWhiteSpace(m.TeamB) &&
+                                                    line.ToLower().Contains(m.TeamA.ToLower()) &&
+                                                    line.ToLower().Contains(m.TeamB.ToLower()));
                     var tipRegexMatches = matchTipRegex.Matches(line);
                     if(tipRegexMatches.Count < 2 || realMatch == null)
                         continue;
 
-                    //var tipMatchIndex = tipRegexMatches.Count - 1;
+                    var tipMatchIndex = tipRegexMatches.Count - 2;
                     // save tips
                     var footballMatch = new FootballMatch
                     {
                         TeamA = realMatch.TeamA,
                         TeamB = realMatch.TeamB,
-                        ResultA = Int32.Parse(tipRegexMatches[1].Groups[1].Value),
-                        ResultB = Int32.Parse(tipRegexMatches[1].Groups[2].Value),
+                        ResultA = Int32.Parse(tipRegexMatches[tipMatchIndex].Groups[1].Value),
+                        ResultB = Int32.Parse(tipRegexMatches[tipMatchIndex].Groups[2].Value),
                     };
                     user.Tips.Add(footballMatch);
                 }

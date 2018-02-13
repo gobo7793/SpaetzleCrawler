@@ -59,7 +59,7 @@ namespace SpätzleCrawler
                 SimpleLog.ShowLogFile();
             if(key.KeyChar == 'c' || key.KeyChar == 'C')
                 foreach(var s in settings)
-                    s.Excel.CloseFile();
+                    s?.Excel?.CloseFile();
             SimpleLog.StopLogging();
         }
 
