@@ -6,20 +6,20 @@ Note: The template for the excel file is currently not open source.
 
 ## Requirements
 - .NET Framework 4.7
-- Microsoft Excel
+- Microsoft Excel (tested on Excel 2007+)
 
 ## Run the crawler
 Note: All row/column indizes based on the worksheet for tip entries.
 1. Compile the source or download a binary
 2. Create a textfile called `config.txt` in the same directory like the `SpätzleCrawler.exe` file
-3. Insert the configurations for the leages described below
-4. Enter the matches of the current Bundesliga matchday into columns `B` (home team) and `E` (away team)
+3. Insert the configurations for the leagues described below
+4. Enter the matches of the current Bundesliga matchday into columns `B` (home team) and `E` (away team) in the Excel file
     * All previously matchdays needed at least one result in column `C` (home goals)
     * The current matchday is the first matchday with no results in column `C`
-5. Start the crawler (no worry, it uses a command line)
+5. Start the crawler (via explorer or command line)
 6. Enter the thread url of the current tipping thread
-    * The userlist is stored in row `2` from column `L` to the first not merged cell in the row
 7. The crawler tries to parse the tips:
+    * Read the userlist stored in row `2` from column `L` to the first not merged cell in the row
     * Download all pages in the thread, mostly 5 oder 6
     * Getting post data (URL, username and content without quotes)
     * Parse the matches between the users if one post with all usernames is found
